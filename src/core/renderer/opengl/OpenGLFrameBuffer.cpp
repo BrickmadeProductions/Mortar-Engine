@@ -1,0 +1,8 @@
+namespace MortarCore 
+{
+	class OpenGLFrameBuffer 
+	{
+
+	};
+
+}

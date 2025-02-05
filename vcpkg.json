@@ -1,0 +1,13 @@
+{
+  "name": "mortar-engine",
+  "version-string" : "0.1.0",
+  "dependencies": [
+    "glfw3",
+    "glad",
+    "glm",
+    "daxa",
+    "imgui",
+    "eastl",
+    "flecs"
+  ]
+}
