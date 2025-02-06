@@ -13,7 +13,7 @@ namespace MortarCore {
 		virtual void Unbind() const override;
 	};
 
-	class OpenGLIndexBuffer {
+	class OpenGLIndexBuffer : public IndexBuffer {
 
 	public:
 		OpenGLIndexBuffer(uint32_t* indecies, uint32_t size);

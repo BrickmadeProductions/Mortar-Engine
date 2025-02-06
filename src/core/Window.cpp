@@ -1,11 +1,12 @@
 #include "Window.h"
+#include "core/renderer/RenderCommands.h"
 
 namespace MortarCore {
 
-	Window::Window(const char* t, const uint32_t w, const uint32_t h) : title(*t), windowWidth(w), windowHeight(h)
+	Window::Window(const char* t, RenderAPI::API renderAPI, const uint32_t w, const uint32_t h) : title(*t), windowWidth(w), windowHeight(h)
 	{
 		//Init GLFW
-		if (!glfwInit()) return;
+		MRT_CORE_ASSERT(glfwInit());
 
 		//Tell GLFW versions
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -20,29 +21,27 @@ namespace MortarCore {
 		//Check for errors
 		if (glfwwindow == NULL) {
 
-			std::cout << "Failed to create window!" << std::endl;
+			MRT_PRINT_ERR("glfw Window Creation Failed!...")
 			glfwTerminate();
+			MRT_CORE_ASSERT(false);
 		}
-
-		//ABSTRACT LATER FOR VULKAN
-		//TODO
-
+		
 		//Create glfw context in the window
 		glfwMakeContextCurrent(glfwwindow);
+		glfwSetFramebufferSizeCallback(glfwwindow, [](GLFWwindow* window, int width, int height) { RenderCommands::SetViewport(0, 0, width, height); });
+		//set the api
+		RenderAPI::SetAPI(renderAPI);
 
-		//Load OpenGL
-		gladLoadGL();
+		//initialze static renderAPI
+		MRT_CORE_ASSERT(RenderCommands::InitializeAPI());
 
-		//Create a viewport with OPENGL
-		glViewport(0, 0, windowWidth, windowHeight);
-
-		//glfwSetKeyCallback(glfwwindow, key_callback);
-		std::cout << "\n" << std::endl;
-		printf("OpenGL version: %s\n", glGetString(GL_VERSION));
+		RenderCommands::SetClearColor(glm::vec4(0.5f, 0.8f, 0.9f, 1.0f));
+		
+		MRT_PRINT("Window And Renderer Initialized..")
 
 	}
 
-	void Window::PushBuffer()
+	void Window::Push()
 	{
 		//swap the back buffer to the screen buffer
 		glfwSwapBuffers(glfwwindow);

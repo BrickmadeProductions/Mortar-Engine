@@ -1,14 +1,17 @@
-#include "Buffer.h"
+#include "core/Application.h"
+#include "core/renderer/opengl/OpenGLFrameBuffer.h"
 
 namespace MortarCore
 {
-	FrameBuffer& FrameBuffer::CreateBuffer()
+	Ref<FrameBuffer> FrameBuffer::CreateBuffer()
 	{
-		switch (Application::GetRenderer().GetAPI())
+		switch (RenderAPI::GetAPI())
 		{
-			case Renderer::API::OPENGL: return &OpenGLFrameBuffer( );
+			case RenderAPI::API::OPENGL: return CreateRef<OpenGLFrameBuffer>();
 
-			case Renderer::API::VULKAN: return nullptr;
+			case RenderAPI::API::VULKAN: return nullptr;
+
+			default: return nullptr;
 		}
 	}
 

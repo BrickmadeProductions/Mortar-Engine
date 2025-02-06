@@ -1,4 +1,6 @@
 #include "Utils.h"
+#include "renderer/RenderAPI.h"
+#include "renderer/universal/FrameBuffer.h"
 
 namespace MortarCore {
 
@@ -6,21 +8,20 @@ namespace MortarCore {
 	{
 	public:
 
-		Window(const char* title, const uint32_t width, const uint32_t height);
-		Window() = default;
+		Window(const char* title, RenderAPI::API renderAPI, const uint32_t width, const uint32_t height);
 		~Window() = default;
 
-		GLFWwindow* GetWindow() { return glfwwindow; }
+		GLFWwindow* GetNativeWindow() { return glfwwindow; }
+
 		uint32_t GetWidth() { return windowWidth; }
 		uint32_t GetHeight() { return windowHeight; }
 
-		void PushBuffer();
+		void Push();
 
 	private:
 
 		char title;
 		uint32_t windowWidth, windowHeight;
 		GLFWwindow* glfwwindow;
-
 	};
 }

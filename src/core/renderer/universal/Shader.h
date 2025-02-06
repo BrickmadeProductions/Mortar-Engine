@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Utils.h"
-#include "Buffer.h"
 
 namespace MortarCore {
 
@@ -10,7 +9,7 @@ namespace MortarCore {
 		
 	public:
 
-		static Shader& CreateProgram(const char* vertexFilePath, const char* fragmentFilePath);
+		static Ref<Shader> CreateProgram(const char* vertexFilePath, const char* fragmentFilePath);
 
 		virtual ~Shader() = default;
 
@@ -32,8 +31,6 @@ namespace MortarCore {
 	protected:
 
 		uint32_t m_ShaderID;
-
-	private:
 
 		virtual uint32_t GetUnformLocation(const char*) const = 0;
 

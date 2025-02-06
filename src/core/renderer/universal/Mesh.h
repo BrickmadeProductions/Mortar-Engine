@@ -1,59 +1,25 @@
 #pragma once
 
-#include "Shader.h"
+#include "Material.h"
+#include "Utils.h"
 
 namespace MortarCore {
-
-	//MATERIAL STRUCTURE
-	struct Material
+    
+	struct Vertex 
 	{
-	public:
-
-		Material(Shader& shader) :
-			m_Shader(shader)
-		{
-
-		}
-
-	private:
-
-		Shader& m_Shader;
-	};
+        glm::vec3 position;
+        glm::vec3 normal;
+    };
 
 	//MESH STRUCTURE
 	struct Mesh
 	{
-	public:
+		Mesh() = default;
+		Mesh(Mesh&) = default;
+		Mesh(Ref<Material>& mat, const std::vector<Vertex>& vertArray) : m_Material(mat), m_VertexArray(vertArray) {}
 
-		Mesh(Material& material, VertexBuffer& vertBuffer, IndexBuffer& indexBuffer)
-			: m_Material(material),
-			m_VertexBuffer(m_VertexBuffer),
-			m_IndexBuffer(m_IndexBuffer)
-		{
-			
-		}
-
-	private:
-
-		Material& m_Material;
-		VertexBuffer& m_VertexBuffer;
-		IndexBuffer& m_IndexBuffer;
-	};
-
-	//MODEL STRUCTURE
-	struct Model
-	{
-	public:
-
-		Model() = default;
-		Model(const Model&) = default;
-		Model(eastl::vector<Ref<Mesh>>& m) : meshes(m) {};
-
-		Ref<Mesh> GetMesh(uint32_t meshIndex) { return meshes[meshIndex]; };
-		void AddMesh(Ref<Mesh>& mesh) { meshes.push_back(mesh); };
-
-	private:
-		eastl::vector<Ref<Mesh>> meshes;
+		Ref<Material> m_Material;
+		const std::vector<Vertex> m_VertexArray;
 	};
 
 

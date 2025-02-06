@@ -1,18 +1,18 @@
+#include "core/renderer/opengl/OpenGLShader.h"
 #include "Shader.h"
-
+#include "core/renderer/RenderAPI.h"
 
 namespace MortarCore {
 
-	Shader::CreateProgram(const char* vertexFile, const char* fragmentFile)
+	Ref<Shader> Shader::CreateProgram(const char* vertexFile, const char* fragmentFile)
 	{
-		const char* vertexSource = ReadFileContents(vertexFile).c_str();
-		const char* fragmentSource = ReadFileContents(fragmentFile).c_str();
-
-		switch (Application::GetRenderer().)
+		switch (RenderAPI::GetAPI())
 		{
-			case Renderer::API::OPENGL: return &OpenGLShader(vertexFile, fragmentFile);
+			case RenderAPI::API::OPENGL: return CreateRef<OpenGLShader>(vertexFile, fragmentFile);
 
-			case Renderer::API::VULKAN: return nullptr;
+			case RenderAPI::API::VULKAN: return nullptr;
+
+			default: return nullptr;
 		} 
 	}
 

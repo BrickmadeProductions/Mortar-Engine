@@ -27,8 +27,7 @@ namespace MortarCore {
 
 	//INDEX BUFFER
 
-	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* indicies, uint32_t size) :
-		m_Count(size)
+	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* indicies, uint32_t size)
 	{
 		glCreateBuffers(1, &m_BufferID);
 

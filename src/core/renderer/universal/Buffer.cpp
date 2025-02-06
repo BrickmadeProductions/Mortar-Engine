@@ -1,24 +1,30 @@
 #include "Buffer.h"
+#include "core/renderer/RenderAPI.h"
+#include "core/renderer/opengl/OpenGLBuffer.h"
 
 namespace MortarCore
 {
-	VertexBuffer& VertexBuffer::CreateBuffer(float* verts, uint32_t size) 
+	Ref<VertexBuffer> VertexBuffer::CreateBuffer(float* verts, uint32_t size) 
 	{
-		switch (Application::Get().GetRenderer())
+		switch (RenderAPI::GetAPI())
 		{
-			case Renderer::API::OPENGL: return &OpenGLVertexBuffer(verts, size);
+			case RenderAPI::API::OPENGL: return CreateRef<OpenGLVertexBuffer>(verts, size);
 
-			case Renderer::API::VULKAN: return nullptr;
+			case RenderAPI::API::VULKAN: return nullptr;
+
+			default: return nullptr;
 		}
 	}
 
-	IndexBuffer& IndexBuffer::CreateBuffer(uint32_t* indicies, uint32_t size)
+	Ref<IndexBuffer> IndexBuffer::CreateBuffer(uint32_t* indicies, uint32_t size)
 	{
-		switch (Application::GetRenderer()->GetAPI())
+		switch (RenderAPI::GetAPI())
 		{
-			case Renderer::API::OPENGL: return &OpenGLIndexBuffer(indicies, size);
+			case RenderAPI::API::OPENGL: return CreateRef<OpenGLIndexBuffer>(indicies, size);
 
-			case Renderer::API::VULKAN: return nullptr;
+			case RenderAPI::API::VULKAN: return nullptr;
+
+			default: return nullptr;
 		}
 	}
 }

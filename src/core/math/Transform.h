@@ -1,10 +1,6 @@
 #pragma once
 
-#include "glm/vec3.hpp"
-#include "glm/vec4.hpp"
-
-#ifndef TRANSFORM_H
-#define TRANSFORM_H
+#include "Utils.h"
 
 namespace MortarCore {
 
@@ -19,4 +15,3 @@ namespace MortarCore {
 		Transform(const Transform&) = default;
 	};
 }
-#endif 

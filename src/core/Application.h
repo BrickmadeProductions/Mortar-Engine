@@ -1,12 +1,8 @@
 #pragma once
 
-#include "Utils.h"
 #include "imgui.h"
-#include "Window.h"
-#include "core/renderer/universal/Renderer.h"
-#include "core/world/World.h"
-
-int main(int argc, char** argv);
+#include "core/Window.h"
+#include "core/scene/Scene.h"
 
 namespace MortarCore
 {
@@ -24,8 +20,8 @@ namespace MortarCore
 	struct ApplicationSpecification
 	{
 		const char* Title = "Game";
-		Renderer::API RenderAPI;
-		int WinWidth, WinHeight;
+		RenderAPI::API RenderAPI;
+		uint32_t WinWidth, WinHeight;
 		ApplicationCommandLineArgs CommandLineArgs;
 	};
 
@@ -33,46 +29,46 @@ namespace MortarCore
 	{
 	public:
 
-		Application(const ApplicationSpecification& args);
-		~Application();
+		Application(const ApplicationSpecification& spec) : m_Spec(spec)
+		{
+			MRT_STARTUP();
 
-		inline Window& GetWindow() { return m_Window; }
-		inline Renderer& GetRenderer() { return m_Renderer; }
+			m_Scene = CreateScope<Scene>();
+ 			m_Window = CreateScope<Window>(spec.Title, spec.RenderAPI, spec.WinWidth, spec.WinHeight);
+			s_Instance = this;
+		}
 
-		inline void SetWorld(World& world) { m_World = &world; }
-		inline World& GetWorld() { return *m_World; }
+		virtual ~Application();
+
+		Window& GetWindow() { return *m_Window; }
+		Scene& GetScene() { return *m_Scene; }
+		RenderAPI& GetRenderer() { return *m_Renderer; }
 
 		inline static Application& Get() { return *s_Instance; }
 
 		//void SubmitToMainThread(const std::function<void()>& function);
 
-	private:
-
 		void Run();
-		bool ShouldRun() { return !glfwWindowShouldClose(m_Window.GetWindow()); }
+		bool ShouldRun() { return !glfwWindowShouldClose(m_Window->GetNativeWindow()); }
 		int Close();
 
 	private:
 
-		Window m_Window;
-		Renderer m_Renderer;
-
-		World* m_World;
+		Scope<Window> m_Window;
+		Scope<RenderAPI> m_Renderer;
+		Scope<Scene> m_Scene;
 
 		bool m_Running = true;
 		bool m_Minimized = false;
 
-		float m_LastFrameTime = 0.0f;
-		float m_TimeSinceLastTick = 0.0;
+		double m_LastFrameTime = 0.0f;
+		double m_TimeSinceLastTick = 0.0;
 
 	private:
 
+		static Application* s_Instance;
 		ApplicationSpecification m_Spec;
 
-		friend int ::main(int argc, char** argv);
 	};
-
-	//defined by the seperate application instance using the engine
-	Application* CreateApplication(ApplicationCommandLineArgs args);
 
 }
