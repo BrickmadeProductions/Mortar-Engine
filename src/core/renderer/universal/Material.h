@@ -3,6 +3,7 @@
 namespace MortarCore 
 {
 class Shader;
+class Texture;
 
 //MATERIAL STRUCTURE
 	struct Material
@@ -12,5 +13,6 @@ class Shader;
 		Material(Ref<Shader>& shader) : m_Shader(shader) {}
 
 		Ref<Shader> m_Shader;
+		Ref<Texture> m_MainTex;
 	};
 }

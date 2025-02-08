@@ -10,12 +10,13 @@ namespace MortarCore {
 
 	public:
 
-		OpenGLVertexArray(const std::vector<Ref<VertexBuffer>>& vertBuffer, const Ref<IndexBuffer>& indexBuffer);
+		OpenGLVertexArray();
 		virtual ~OpenGLVertexArray();
 
-		virtual void Bind() const override;
+		virtual void PushVertexBuffer(const Ref<VertexBuffer>& vertBuffer);
+		virtual void SetIndexBuffer( const Ref<IndexBuffer>& indexBuffer);
+		virtual void Bind() override;
 		virtual void Unbind() const override;
-
 	};
 
 }

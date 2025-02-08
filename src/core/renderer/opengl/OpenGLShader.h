@@ -21,12 +21,15 @@ namespace MortarCore {
 		virtual void SetVec3(glm::vec3 v3, const char* location) const override;
 		virtual void SetVec4(glm::vec4 v4, const char* location) const override;
 		virtual void SetMat4(glm::mat4x4 m4, const char* location) const override;
+
+		virtual void LinkTexture(uint32_t textureID, const char* location) const override;
+
 		virtual void BindAttrib(uint32_t attrib, const char* location) const override;
 
 	protected:
 	
 		virtual uint32_t GetUnformLocation(const char*) const override;
-		virtual void CompileErrors(const char* type) const override;
+		virtual void CompileErrors(const char* type, uint32_t shaderID) const override;
 
 	};
 }

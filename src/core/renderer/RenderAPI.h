@@ -1,8 +1,8 @@
 #pragma once
 
 #include "core/renderer/universal/VertexArray.h"
-#include "core/renderer/ShaderLibrary.h"
-
+#include "core/renderer/Renderer.h"
+#include "core/renderer/universal/load/ImageLoader.h"
 
 namespace MortarCore
 {
@@ -26,18 +26,21 @@ namespace MortarCore
         virtual void Clear() = 0;
 
         virtual void DrawIndexed(const Ref<VertexArray>& VertexArray, uint32_t vertCount) = 0;
+        virtual void LoadTexture(Ref<Texture>& texture) = 0;
+
+        std::vector<Ref<Material>>& GetCachedMaterials() { return m_CachedMaterials; }
+        std::vector<Ref<Texture>>& GetCachedTextures() { return m_CachedTextures; }
 
         static API GetAPI() { return s_API; }
         static void SetAPI(API api) { s_API = api; }
-
-        ShaderLibrary GetShaderLibrary() { return m_ShaderLibrary; }
 
         static Scope<RenderAPI> Create();
 
     protected:
 
         static API s_API;
-        ShaderLibrary m_ShaderLibrary;
+        std::vector<Ref<Material>> m_CachedMaterials;
+        std::vector<Ref<Texture>> m_CachedTextures;
 
     };
 

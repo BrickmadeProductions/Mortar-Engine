@@ -5,24 +5,12 @@
 
 namespace MortarCore {
 
+
 	static const float clampF(const float val, const float min, const float max) {
 
 		return std::fmax(min, std::fmin(max, val));
 	}
 
-	static const glm::mat4x4 getPerspectiveProjection(const GLfloat width, const GLfloat height, const float fov, const float far, const float near) {
-
-
-		return glm::perspectiveFov(fov, width, height, near, far);
-
-	}
-
-	static const glm::mat4x4 getOrthoProjection(const float left, const float right, const float bottom, const float top, const float near, const float far) {
-
-		//Ortho(left, right, bottom, top, near, far, Main.game.gameDisplay.WIDTH, Main.game.gameDisplay.HEIGHT);
-		return glm::ortho(left, right, bottom, top);
-
-	}
 	static const glm::mat4x4 getTransformationMatrix(const Transform& transform) {
 
 		glm::mat4x4 transformation = glm::mat4x4(1.0);
@@ -71,11 +59,8 @@ namespace MortarCore {
 		return glm::lookAt(transform.position, transform.position + getForward(transform), glm::vec3(0,1,0));
 	}
 
-	static const glm::vec3 toEuler(const glm::quat& rotation) {
 
-		return glm::vec3(rotation.x, rotation.y, rotation.z);
-
-	}
+	
 	
 }
 

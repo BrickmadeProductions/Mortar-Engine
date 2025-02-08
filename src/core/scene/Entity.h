@@ -1,6 +1,8 @@
 #pragma once
 
+#include "Utils.h"
 #include "core/renderer/universal/Model.h"
+#include "core/math/Transform.h"
 
 namespace MortarCore
 {
@@ -9,26 +11,34 @@ namespace MortarCore
         
         public:
 
-            Entity() = default;
+            Entity(std::string name) : Name(name), Transform() {};
+            Entity(std::string name, Transform& t) : Name(name), Transform(t) {};
             Entity(const Entity&) = default;
-            ~Entity() = default;
+            virtual ~Entity() = default;
             
+            //Called after the object is instantiated
+            virtual void Awake() {};
+
             //Called once per tick
-            virtual void Tick() = 0;
+            virtual void Tick() {}
 
             //Called every frame 
-            virtual void Update() = 0;
+            virtual void Update(double delta) {}
             
             //Called after this object gets its model drawn, but hasn't been pushed to the screen yet
-            virtual void Draw() = 0;
+            virtual void PostDraw() {}
 
-            void LoadModel(Ref<Model>& model) { m_Model = model; }
+            void LoadModel(const Ref<Model>& model) { m_Model = model; }
             Ref<Model> GetModel() { return m_Model; }
-
+        
+            std::string Name;
+            Transform Transform;
+            bool IsActive = true;
+            
         private:
             
             Ref<Model> m_Model;
-
+            
     };
     
 }

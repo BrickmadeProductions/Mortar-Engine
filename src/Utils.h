@@ -10,8 +10,10 @@
 #include <EASTL/list.h>
 #include <EASTL/shared_ptr.h>
 
+#include <filesystem>
 #include <cstdlib>
 #include <iostream>
+#include <deque>
 #include <list>
 #include <vector>
 #include <map>
@@ -30,6 +32,7 @@
 
 //mathmatics
 #include <glm/glm.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
@@ -42,7 +45,7 @@
 #if MTR_DEBUG
     #define MRT_CORE_ASSERT(condition)                                                \
             if (!(condition)) {                                            \
-                std::cout << "\033[31mMORTAR ASSERT FAILED: " #condition << " at "       \
+                std::cout << "\033[31mMortar Engine: Assertion Failed: " #condition << " at "       \
                           << __FILE__ << ":" << __LINE__ << std::endl;      \
                 std::abort();                                                \
             }                                                             \

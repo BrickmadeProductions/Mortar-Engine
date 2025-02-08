@@ -6,7 +6,6 @@
     "glad",
     "glm",
     "imgui",
-    "eastl",
-    "flecs"
+    "eastl"
   ]
 }

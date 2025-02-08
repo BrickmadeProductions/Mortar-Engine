@@ -10,20 +10,23 @@ namespace MortarCore {
 
 		virtual ~VertexArray() = default;
 
-		virtual void Bind() const = 0;
+		virtual void Bind() = 0;
 		virtual void Unbind() const = 0;
 
-		virtual const eastl::vector<Ref<VertexBuffer>>& GetVertexBuffers() { return m_VertexBuffers; }
-		virtual const Ref<IndexBuffer>& GetIndexBuffer() { return m_IndexBuffer; }
+		virtual void PushVertexBuffer(const Ref<VertexBuffer>& vertBuffer) = 0;
+		virtual void SetIndexBuffer( const Ref<IndexBuffer>& indexBuffer) = 0;
 
-		static Ref<VertexArray> Create(const std::vector<Ref<VertexBuffer>>& vertBuffers , const Ref<IndexBuffer>& indexBuffer);
+		const std::vector<Ref<VertexBuffer>>& GetVertexBuffers() { return m_VertexBuffers; }
+		const Ref<IndexBuffer>& GetIndexBuffer() { return m_IndexBuffer; }
+
+		static Ref<VertexArray> Create();
 
 	protected:
 
 		uint32_t m_BufferID;
-		uint32_t m_VertexBufferIndex = 0;
+		uint32_t m_VertexBufferIndex;
 		
-		eastl::vector<Ref<VertexBuffer>> m_VertexBuffers;
+		std::vector<Ref<VertexBuffer>> m_VertexBuffers;
 		Ref<IndexBuffer> m_IndexBuffer;
 	};
 

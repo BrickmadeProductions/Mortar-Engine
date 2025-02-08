@@ -13,13 +13,11 @@ namespace MortarCore
 
         Model() = default;
         Model(const Model&) = default;
-        Model(Ref<Mesh>& m) { meshes.emplace(&m); };
-        Model(eastl::vector<Ref<Mesh>>& m) : meshes(m) {};
+        Model(Ref<Mesh>& m) : mesh(m) {};
 
-        Ref<Mesh> GetMesh(uint32_t meshIndex) { return meshes[meshIndex]; };
-        void AddMesh(Ref<Mesh>& mesh) { meshes.push_back(mesh); };
+        Ref<Mesh> GetMesh() { return mesh; };
 
     private:
-        eastl::vector<Ref<Mesh>> meshes;
+        Ref<Mesh> mesh;
     };
 }

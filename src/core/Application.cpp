@@ -19,12 +19,14 @@ namespace MortarCore
 			{
 
 				m_Scene->Tick();
-
+				
+				m_CurrentTick++;
 				m_TimeSinceLastTick = 0;
+				
 			}
 
 			//update the frame by frame method that has the last frame time as a param
-			m_Scene->Update(m_LastFrameTime);
+			m_Scene->Update(GetFrameTime());
 		}
 
 		//render the scene and push to the windows frame buffer
@@ -33,8 +35,10 @@ namespace MortarCore
 
 		clock_t endFrame = clock();
 
-		m_LastFrameTime = double(endFrame - beginFrame);
-		m_TimeSinceLastTick += m_LastFrameTime;
+		m_FrameTimes.push_back(double(endFrame - beginFrame) / 1000.0);
+		m_TimeSinceLastTick += GetFrameTime();
+
+		if (m_FrameTimes.size() > 100) m_FrameTimes.clear();
 	}
 
 	int Application::Close()

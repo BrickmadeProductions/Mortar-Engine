@@ -17,6 +17,7 @@ namespace MortarCore
         void Clear() override;
 
         void DrawIndexed(const Ref<VertexArray>& VertexArray, uint32_t vertCount) override;
+        void LoadTexture(Ref<Texture>& texture) override;
 
     };
 }

@@ -1,6 +1,10 @@
+#pragma once
+
 #include "Utils.h"
 #include "renderer/RenderAPI.h"
 #include "renderer/universal/FrameBuffer.h"
+#include "core/Window.h"
+
 
 namespace MortarCore {
 

@@ -1,25 +1,26 @@
 #pragma once
 
-#include "Material.h"
 #include "Utils.h"
 
 namespace MortarCore {
     
-	struct Vertex 
-	{
-        glm::vec3 position;
-        glm::vec3 normal;
-    };
+struct Material;
+class VertexArray;
 
 	//MESH STRUCTURE
 	struct Mesh
 	{
-		Mesh() = default;
+	public:
 		Mesh(Mesh&) = default;
-		Mesh(Ref<Material>& mat, const std::vector<Vertex>& vertArray) : m_Material(mat), m_VertexArray(vertArray) {}
+		Mesh(const Ref<VertexArray>& vertArray) : m_VertexArray(vertArray) {}
 
+		Ref<VertexArray>& GetVertexArray() { return m_VertexArray;}
+		
 		Ref<Material> m_Material;
-		const std::vector<Vertex> m_VertexArray;
+
+	private:
+		
+		Ref<VertexArray> m_VertexArray;
 	};
 
 

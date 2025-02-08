@@ -4,4 +4,5 @@
 namespace MortarCore
 {
     Scope<RenderAPI> RenderCommands::s_RenderAPI = RenderAPI::Create();
+
 }

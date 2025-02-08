@@ -1,38 +1,43 @@
 #pragma once
 
 #include "core/math/Math.h"
-#include "core/Application.h"
+#include "core/Window.h"
+#include "core/scene/Entity.h"
 
 namespace MortarCore {
 
-	class Camera
+	class Camera : public Entity
 	{
 	public:
-
-		Transform transform;
-
-		Camera(Transform transform);
-		Camera(const Camera&) = default;
+		
+		using Entity::Entity;
+		virtual ~Camera();
 
 		//retreives the perspective projection based on the params
-	    void UpdateProjections(float fov, float near, float far);
+	    void UpdateProjections(uint32_t fov, float near, float far);
+		glm::mat4 GetViewMatrix() { return m_ViewMatrix; }
+		glm::mat4 GetProjectionMatrix() { return m_ProjectionMatrix; }
 
-		void Update();
+		virtual void Awake() override;
+		virtual void Tick() override;
+		virtual void Update(double delta) override;
+		virtual void PostDraw() override;
+
 
 	private:
 
-		//window reference to access the width, height, etc.
-		Window& window;
+		//window pointer to access the width, height, etc.
+		Window* window;
 
 		//MOVE TO SEPERATE CLASS LATER
 		float speed;
-		float sensitivity = 0.5f;
+		float defaultSpeed;
+		float sensitivity;
 		bool firstClick = false;
 		glm::vec3 moveDirection;
 		//MOVE TO SEPERATE CLASS LATER
 
-		glm::mat4 m_ProjectionMatrix;
 		glm::mat4 m_ViewMatrix;
-		glm::mat4 m_ViewProjectionMatrix;
+		glm::mat4 m_ProjectionMatrix;
 	};
 }

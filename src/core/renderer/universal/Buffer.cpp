@@ -4,7 +4,7 @@
 
 namespace MortarCore
 {
-	Ref<VertexBuffer> VertexBuffer::CreateBuffer(float* verts, uint32_t size) 
+	Ref<VertexBuffer> VertexBuffer::CreateBuffer(const void* verts, uint32_t size) 
 	{
 		switch (RenderAPI::GetAPI())
 		{

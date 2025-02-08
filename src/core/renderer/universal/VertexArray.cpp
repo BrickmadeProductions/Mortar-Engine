@@ -5,11 +5,11 @@
 
 namespace MortarCore
 {
-	Ref<VertexArray> VertexArray::Create(const std::vector<Ref<VertexBuffer>>& vertBuffers, const Ref<IndexBuffer>& indexBuffer)
+	Ref<VertexArray> VertexArray::Create()
 	{
 		switch (RenderAPI::GetAPI())
 		{
-			case RenderAPI::API::OPENGL: return CreateRef<OpenGLVertexArray>(vertBuffers, indexBuffer);
+			case RenderAPI::API::OPENGL: return CreateRef<OpenGLVertexArray>();
 
 			case RenderAPI::API::VULKAN: return nullptr;
 

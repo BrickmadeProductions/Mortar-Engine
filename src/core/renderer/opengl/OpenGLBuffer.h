@@ -6,7 +6,7 @@ namespace MortarCore {
 	class OpenGLVertexBuffer : public VertexBuffer {
 
 	public:
-		OpenGLVertexBuffer(float* verts, uint32_t size);
+		OpenGLVertexBuffer(const void* verts, uint32_t size);
 		virtual ~OpenGLVertexBuffer();
 
 		virtual void Bind() const override;
