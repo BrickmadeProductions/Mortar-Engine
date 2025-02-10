@@ -15,17 +15,16 @@ namespace MortarCore
 			case ShaderElement::ShaderElementType::Vec2i:     return GL_INT;
 			case ShaderElement::ShaderElementType::Vec3i:     return GL_INT;
 			case ShaderElement::ShaderElementType::Vec4i:      return GL_INT;
-			case ShaderElement::ShaderElementType::Mat3:     return GL_FLOAT;
-			case ShaderElement::ShaderElementType::Mat4:     return GL_INT;
 		}
 
 		MRT_CORE_ASSERT(false);
 		return 0;
 	}
 
-	OpenGLVertexArray::OpenGLVertexArray()
+	OpenGLVertexArray::OpenGLVertexArray(uint32_t drawInstances)
 	{
 		m_VertexBufferIndex = 0;
+		m_DrawInstances = drawInstances;
 		glGenVertexArrays(1, &m_BufferID);
 		MRT_CORE_ASSERT(!glGetError());
 	}
@@ -35,7 +34,7 @@ namespace MortarCore
 		glDeleteVertexArrays(1, &m_BufferID);
 	}
 
-	void OpenGLVertexArray::PushVertexBuffer(const Ref<VertexBuffer>& vertexBuffer)
+	void OpenGLVertexArray::PushVertexBuffer(const Ref<VertexBuffer>& vertexBuffer, uint32_t divisor)
 	{
 		
 		glBindVertexArray(m_BufferID);
@@ -48,12 +47,11 @@ namespace MortarCore
 
 		for (auto& element : layout.GetElements())
 		{
-			//MRT_PRINT("Vertex Attrib Index: " + std::to_string(m_VertexBufferIndex) + " Element Count: " + std::to_string(element.GetComponents()) + " Stride: " + std::to_string(layout.Stride));
-			//MRT_PRINT(element.Offset);
+			MRT_PRINT("Vertex Attrib Index: " + std::to_string(m_VertexBufferIndex) + " Element Count: " + std::to_string(element.GetComponents()) + " Stride: " + std::to_string(layout.Stride));
 			//default layout (abstract later)
 			//(vertexPos, normalDir, texCoord)
 			glVertexAttribPointer(m_VertexBufferIndex,
-				element.GetComponents(), 
+				element.GetComponents(),
 				ShaderDataTypeToOpenGLBaseType(element.Type),
 				GL_FALSE,
 				layout.Stride,
@@ -62,12 +60,19 @@ namespace MortarCore
 	
 			glEnableVertexAttribArray(m_VertexBufferIndex);
 			MRT_CORE_ASSERT(!glGetError());
+
+			glVertexAttribDivisor(m_VertexBufferIndex, divisor); // divisor = 1 each instance gets a unique value for this attribute
+			MRT_CORE_ASSERT(!glGetError());
 	
-			m_VertexBufferIndex++;
+			m_VertexBufferIndex++;			
+		
+
 		}
 
 		//add to list
 		m_VertexBuffers.push_back(vertexBuffer);
+
+		vertexBuffer->Unbind();
 		
 	}
 

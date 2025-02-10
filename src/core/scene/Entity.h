@@ -11,8 +11,8 @@ namespace MortarCore
         
         public:
 
-            Entity(std::string name) : Name(name), Transform() {};
-            Entity(std::string name, Transform& t) : Name(name), Transform(t) {};
+            Entity() : Name("Entity") {}
+            Entity(std::string name) : Name(name){};
             Entity(const Entity&) = default;
             virtual ~Entity() = default;
             
@@ -28,16 +28,21 @@ namespace MortarCore
             //Called after this object gets its model drawn, but hasn't been pushed to the screen yet
             virtual void PostDraw() {}
 
-            void LoadModel(const Ref<Model>& model) { m_Model = model; }
-            Ref<Model> GetModel() { return m_Model; }
-        
+            template <class T>
+            inline bool IsEntityOfType()
+            {
+                return dynamic_cast<T*>(this) != nullptr;
+            }
+            template <class T>
+            inline T* Get()
+            {
+                return dynamic_cast<T*>(this);
+            }
+
+        public:
             std::string Name;
-            Transform Transform;
             bool IsActive = true;
             
-        private:
-            
-            Ref<Model> m_Model;
             
     };
     

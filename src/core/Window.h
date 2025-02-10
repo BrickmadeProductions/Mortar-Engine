@@ -21,6 +21,7 @@ namespace MortarCore {
 		uint32_t GetHeight() { return windowHeight; }
 
 		void Push();
+		void UpdateTitle();
 
 	private:
 

@@ -33,7 +33,7 @@ namespace MortarCore {
 		glfwSetFramebufferSizeCallback(glfwwindow, [](GLFWwindow* window, int width, int height) { RenderCommands::SetViewport(0, 0, width, height); });
 		
 		//enable vsync
-		glfwSwapInterval(1);
+		glfwSwapInterval(0);
 		//set the api
 		RenderAPI::SetAPI(renderAPI);
 
@@ -46,16 +46,22 @@ namespace MortarCore {
 
 	}
 
-	void Window::Push()
+	void Window::UpdateTitle()
 	{
+		Transform& CameraTransform = Scene::GetCameraCurrent()->Transform;
+
         //set window
         std::string total(std::string("MortarEngine v0.01 " 
 			+ std::string(Application::Get().GetAppSpec().Title) 
-			+ " | Camera Location: " + std::to_string(Scene::GetCameraCurrent()->Transform.position.x) + ", " + std::to_string(Scene::GetCameraCurrent()->Transform.position.y) + ", " + std::to_string(Scene::GetCameraCurrent()->Transform.position.z) 
-			+ " | Camera Rotation: " + std::to_string(Scene::GetCameraCurrent()->Transform.rotation.x) + ", " + std::to_string(Scene::GetCameraCurrent()->Transform.rotation.y) + ", " + std::to_string(Scene::GetCameraCurrent()->Transform.rotation.z) 
-			+ " | Memory Usage: " + std::to_string(getMemoryUsageInMB()) + " Mb | FPS: " + std::to_string(Application::Get().GetFPS())));
-		glfwSetWindowTitle(Application::Get().GetWindow().GetNativeWindow(), total.c_str());
+			+ " | Camera Location: " + std::to_string(CameraTransform.position.x) + ", " + std::to_string(CameraTransform.position.y) + ", " + std::to_string(CameraTransform.position.z) 
+			+ " | Camera Rotation: " + std::to_string(CameraTransform.rotation.x) + ", " + std::to_string(CameraTransform.rotation.y) + ", " + std::to_string(CameraTransform.rotation.z) 
+			+ " | Memory Usage: " + std::to_string(getMemoryUsageInMB()) + " Mb | FPS: " + std::to_string(uint32_t(Application::Get().GetFPS()))));
+		glfwSetWindowTitle(Application::GetWindow().GetNativeWindow(), total.c_str());
+	}
 
+	void Window::Push()
+	{
+		MRT_PROF();
 		//swap the back buffer to the screen buffer
 		glfwSwapBuffers(glfwwindow);
 		glfwPollEvents();

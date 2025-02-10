@@ -14,7 +14,7 @@ namespace MortarCore {
 		sensitivity = 50.0f;
 		moveDirection = glm::vec3(0);
 
-		window = &Application::Get().GetWindow();
+		window = &Application::GetWindow();
 	}
 
     void Camera::Tick()
@@ -71,7 +71,7 @@ namespace MortarCore {
 
 		if (glfwGetKey(window->GetNativeWindow(), GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
 		{
-			speed = defaultSpeed * 2.0f;
+			speed = defaultSpeed * 5.0f;
 		}
 		if (glfwGetKey(window->GetNativeWindow(), GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
 		{
@@ -140,7 +140,7 @@ namespace MortarCore {
 			firstClick = true;
 		}
 
-		UpdateProjections(60, 0.1f, 1000.0f);
+		UpdateProjections(60, 0.1f, 10000.0f);
 	}
 
 	void Camera::PostDraw()

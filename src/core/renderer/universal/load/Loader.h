@@ -23,7 +23,6 @@ namespace MortarCore
     class OBJLoader
     {
     public:
-
     
         static Ref<Model> LoadObj(const std::string& filepath) 
         {
@@ -169,43 +168,27 @@ namespace MortarCore
             
             MRT_PRINT("Obj File Parsed.. ");
 
-            //LOAD RENDER OBJECTS
+            MRT_PRINT("Total Indicies " + indicesRawBuffer.size());    
 
-            //create vertex array
-            Ref<VertexArray> VertexArray = VertexArray::Create();
-
-            //pack all vertices into buffer objects and pack them into the vertex array 
-            Ref<VertexBuffer> VertexBuffer = VertexBuffer::CreateBuffer(vertexRawBuffer.data(), uint32_t(vertexRawBuffer.size() * sizeof(vertexRawBuffer[0])));
-            //create index buffer
-            Ref<IndexBuffer> IndexBuffer = IndexBuffer::CreateBuffer(indicesRawBuffer.data(), uint32_t(indicesRawBuffer.size()));
-            
-            BufferLayout layout = 
+            BufferLayout objLayout =
             {
-                //pos
                 { "a_Position", ShaderElement::ShaderElementType::Vec3f },
-                //normal
+                
                 { "a_Normal", ShaderElement::ShaderElementType::Vec3f },
-                //uv
-                { "a_TexCoords", ShaderElement::ShaderElementType::Vec2f },
+                
+                { "a_TexCoords", ShaderElement::ShaderElementType::Vec2f }
             };
 
-            VertexBuffer->SetLayout(layout);
-
-            VertexArray->PushVertexBuffer(VertexBuffer);
-            VertexArray->SetIndexBuffer(IndexBuffer);
-            VertexArray->Unbind();
-            
-            MRT_PRINT("Total Indicies " + std::to_string(VertexArray->GetIndexBuffer()->GetIndexCount()));    
-
-            //create mesh, pass in vertex array
-            Ref<Mesh> mesh = CreateRef<Mesh>(VertexArray);
-
-            //create model (if there is multiple meshes we will load multiple)
+            //create mesh, pass in the vertex data
+            Ref<Mesh> mesh = CreateRef<Mesh>(vertexRawBuffer, indicesRawBuffer, objLayout);
+            //create mesh (if there is multiple meshes we will load multiple)
             //we now have a valid model
-            MRT_PRINT("Model Created!...");
+            MRT_PRINT("Mesh Created!...");
+
+            Ref<Model> model = CreateRef<Model>(mesh);
 
             return CreateRef<Model>(mesh);
         }
-           
+
     };
 }

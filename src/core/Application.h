@@ -4,6 +4,7 @@
 #include "imgui.h"
 #include "core/Window.h"
 #include "core/scene/Scene.h"
+#include "core/ThreadPool.h"
 
 namespace MortarCore
 {
@@ -34,41 +35,30 @@ namespace MortarCore
 		{
 			MRT_STARTUP();
 
+			m_ThreadPool = CreateScope<ThreadPool>(32);
  			m_Window = CreateScope<Window>(spec.Title, spec.RenderAPI, spec.WinWidth, spec.WinHeight);
 			m_Scene = CreateScope<Scene>();
 			s_Instance = this;
-
-			m_Scene->Awake();
+			m_LastFrameTime = 1.0;
 		}
 
 		virtual ~Application();
 
 		ApplicationSpecification GetAppSpec() { return m_Spec; }
 
-		Window& GetWindow() { return *m_Window; }
-		Scene& GetScene() { return *m_Scene; }
-		
-		double GetFrameTime()
+		inline double GetFrameTime()
 		{ 
-			if (m_FrameTimes.empty()) return 0.0f;
-			return m_FrameTimes.back();
+			return m_LastFrameTime;
 		}
-		double GetSmoothedFrameTime() 
-		{  
-			if (m_FrameTimes.empty()) return 0.0f;
-
-			double total = 0.0f;
-			for (double time : m_FrameTimes) {
-				total += time;
-			}
-			return total / m_FrameTimes.size(); 
-		}
-		uint32_t GetFPS() { return uint32_t(1000.0 / (GetSmoothedFrameTime() * 1000.0)); }
+		inline double GetFPS() { return 1.0 / m_LastFrameTime; }
 		
 		inline static Application& Get() { return *s_Instance; }
-		
-		//void SubmitToMainThread(const std::function<void()>& function);
 
+		inline static Window& GetWindow() { return *s_Instance->m_Window; }
+		inline static Scene& GetScene() { return *s_Instance->m_Scene; }
+		inline static ThreadPool& GetThreadPool() { return *s_Instance->m_ThreadPool; }
+
+		void Initialize() { m_Scene->Awake(); }
 		void Run();
 		bool ShouldRun() { return !glfwWindowShouldClose(m_Window->GetNativeWindow()); }
 		int Close();
@@ -77,14 +67,16 @@ namespace MortarCore
 
 		Scope<Window> m_Window;
 		Scope<Scene> m_Scene;
+		Scope<ThreadPool> m_ThreadPool;
 
 		bool m_Running = true;
 		bool m_Minimized = false;
 
-		uint32_t  m_CurrentTick = 0;
+		double m_LastFrameTime;
 
-		std::deque<double> m_FrameTimes;
 		double m_TimeSinceLastTick = 0.0;
+		uint32_t m_CurrentTick = 0;
+
 
 	private:
 

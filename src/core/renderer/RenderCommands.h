@@ -26,9 +26,9 @@ namespace MortarCore
             {
                 s_RenderAPI->Clear();
             }
-            static void DrawIndexed(const Ref<VertexArray>& VertexArray, uint32_t vertCount)
+            static void DrawInstanced(const Ref<VertexArray>& VertexArray, uint32_t vertCount, uint32_t instanceCount)
             {
-                s_RenderAPI->DrawIndexed(VertexArray, vertCount);
+                s_RenderAPI->DrawInstanced(VertexArray, vertCount, instanceCount);
             }
 
             //cache

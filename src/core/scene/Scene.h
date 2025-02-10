@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Utils.h"
+#include "RenderEntity.h"
 #include "core/component/Camera.h"
 #include "core/renderer/Renderer.h"
 #include "core/renderer/RenderCommands.h"
@@ -12,13 +13,24 @@ namespace MortarCore {
 	{
 	public:
 
-		Scene() = default;
+		Scene() 
+		{
+			//TODO load default shaders and materials (move to abstraction later)
+			Ref<Shader> defaultShader = Shader::CreateProgram("resource/shader/defaultSpatial.vert", "resource/shader/defaultSpatial.frag");
+
+			MRT_PRINT("Default Shader Loaded...");
+			Ref<Material> defaultMat = CreateRef<Material>(defaultShader);
+			
+			MRT_PRINT("Default Material Loaded...");
+			RenderCommands::CacheMaterial(defaultMat);
+		}
+		
 		Scene(const Scene& scene) = default;
 		~Scene() = default;
 
 		static Camera* GetCameraCurrent();
 
-		//instantiates a blank entity, with a model ref that can be attached
+		//Instantiates a blank entity of type T
 		template <class T>
 		Ref<T> Instantiate(std::string name) 
 		{
@@ -42,6 +54,26 @@ namespace MortarCore {
 			MRT_PRINT("Entity " + std::string(typeid(T).name()) + " Instantiated With ID: " + std::to_string(m_InstanceNonce));
 
 			return entity;
+		}
+
+		//Instantiates a batch of entities based on the model inserted (they will be drawn in one call)
+		template <class T>
+		Ref<RenderBatch> InstantiateBatch(std::string EntityName, Ref<Model> model, int amount) 
+		{			
+			std::vector<Ref<T>> batchEntites;
+			for (int i = 0; i < amount; i++)
+			{
+				Ref<T> entity = Instantiate<T>(std::string(EntityName + std::to_string(i)));
+				entity->SetModel(model);
+
+				batchEntites.push_back(entity);
+			}
+
+			Ref<RenderBatch> batch = CreateRef<RenderBatch>(batchEntites);
+			m_RenderBatches.push_back(batch);
+
+			return batch;
+			
 		}
 
 		template <typename T>
@@ -81,51 +113,71 @@ namespace MortarCore {
 
 			return nullptr;
 		}
-		
+
 		//Gets called after the renderer and window have been intiailized
 		void Awake() 
 		{ 
-			MRT_PRINT("Scene Loading...");
-			//TODO load default shaders and materials (move to abstraction later)
-			Ref<Shader> defaultShader = Shader::CreateProgram("resource/shader/defaultSpatial.vert", "resource/shader/defaultSpatial.frag");
+			MRT_PROF();
+			for (const auto& e : m_GameObjects) 
+			{
+				if (!e.second->IsActive) continue;
+				//get current camera by last active
+				else if (e.second->IsEntityOfType<Camera>()) {
+					m_MainCamera = e.second->Get<Camera>();
+				}
 
-			MRT_PRINT("Default Shader Loaded...");
-			Ref<Material> defaultMat = CreateRef<Material>(defaultShader);
-			
-			MRT_PRINT("Default Material Loaded...");
-			RenderCommands::CacheMaterial(defaultMat);
-
-			for (const auto e : m_GameObjects) e.second->Awake(); 
+				e.second->Awake(); 
+			}
 		}
 		//Called every frame
-		void Update(double delta) { for (const auto e : m_GameObjects) e.second->Update(delta); }
+		void Update(double delta) 
+		{ 
+			MRT_PROF();
+			for (const auto& e : m_GameObjects) 
+			{
+				if (!e.second->IsActive) continue;
+				e.second->Update(delta); 
+				
+			} 
+		}
 		//Called every tick
-		void Tick() { for (const auto e : m_GameObjects) e.second->Tick(); }
+		void Tick() 
+		{ 
+			
+			MRT_PROF();
+			for (const auto& e : m_GameObjects) 
+			{ 
+				if (!e.second->IsActive) continue; 
+				e.second->Tick(); 
+			} 
+		}
 		//Called every time the scene is about to draw
 		void Draw() 
 		{ 
+			MRT_PROF();
 			//clear screen
 			RenderCommands::Clear();
 
-			//draw any meshes here
-			//TODO (Optimize)
-			for (const auto e : m_GameObjects) 
-			{
-				//check if it is a render entity
-				if (e.second->GetModel() == nullptr) continue;
+			//submit batches to renderer
+			for (auto& rb : m_RenderBatches) Renderer::Submit(rb);
 
-				//final submit to shaders
-				Renderer::Submit(e.second);
+			for (const auto& e : m_GameObjects) 
+			{
+				if (!e.second->IsActive) continue;
 
 				//call its post draw function
 				e.second->PostDraw(); 
 			}
 		}
-
+		
 	private:
+
+		Camera* m_MainCamera;
 
 		std::unordered_map<uint32_t, Ref<Entity>> m_GameObjects;
 		std::unordered_map<std::string, Ref<Entity>> m_GameObjectsByName;
+
+		std::vector<Ref<RenderBatch>> m_RenderBatches;
 
 		uint32_t m_InstanceNonce = 0;
 	};

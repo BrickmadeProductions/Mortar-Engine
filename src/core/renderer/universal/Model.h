@@ -13,11 +13,11 @@ namespace MortarCore
 
         Model() = default;
         Model(const Model&) = default;
-        Model(Ref<Mesh>& m) : mesh(m) {};
+        Model(Ref<Mesh>& m) : m_Mesh(m) {};
 
-        Ref<Mesh> GetMesh() { return mesh; };
+        Ref<Mesh>& GetMesh() { return m_Mesh; };
 
     private:
-        Ref<Mesh> mesh;
+        Ref<Mesh> m_Mesh;
     };
 }

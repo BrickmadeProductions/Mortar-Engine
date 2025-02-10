@@ -16,7 +16,7 @@ namespace MortarCore
 		void SetClearColor(const glm::vec4& color) override;
         void Clear() override;
 
-        void DrawIndexed(const Ref<VertexArray>& VertexArray, uint32_t vertCount) override;
+        void DrawInstanced(const Ref<VertexArray>& VertexArray, uint32_t vertCount, uint32_t instanceCount) override;
         void LoadTexture(Ref<Texture>& texture) override;
 
     };

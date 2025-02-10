@@ -20,12 +20,9 @@ namespace MortarCore {
 			Vec2i,
 			Vec3i,
 			Vec4i,
-			Mat3,
-			Mat4,
 
 		};
 
-		ShaderElement() = default;
 		ShaderElement(std::string name, ShaderElementType type) : Name(name), Type(type), Offset(0) { }
 		
 		
@@ -42,8 +39,6 @@ namespace MortarCore {
 				case ShaderElementType::Vec2i: return 2;
 				case ShaderElementType::Vec3i: return 3;
 				case ShaderElementType::Vec4i: return 4;
-				case ShaderElementType::Mat3: return 3 * 3;
-				case ShaderElementType::Mat4: return 4 * 4;
 				default: MRT_CORE_ASSERT(false); return 0;
 			}
 	
@@ -61,8 +56,6 @@ namespace MortarCore {
 				case ShaderElementType::Vec2i: return 2 * sizeof(int);
 				case ShaderElementType::Vec3i: return 3 * sizeof(int);
 				case ShaderElementType::Vec4i: return 4 * sizeof(int);
-				case ShaderElementType::Mat3: return 3 * 3 * sizeof(float);
-				case ShaderElementType::Mat4: return 4 * 4 * sizeof(float);
 				default: MRT_CORE_ASSERT(false); return 0;
 			}
 	
@@ -77,7 +70,6 @@ namespace MortarCore {
 	struct BufferLayout
 	{
 
-		
 		uint32_t Stride = 0;
 
 		BufferLayout() = default;
@@ -96,8 +88,7 @@ namespace MortarCore {
 			{
 				e.Offset = offset;
 				Stride += e.GetSize();
-				offset += e.GetSize();
-				
+				offset += e.GetSize();			
 			}
 
 		}
@@ -116,16 +107,17 @@ namespace MortarCore {
 
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
+		virtual void UpdateBuffer(const void* verts, uint32_t size) const = 0;
 
 		static Ref<VertexBuffer>CreateBuffer(const void* verts, uint32_t size);
 		
-		void SetLayout(BufferLayout layout) { m_BufferLayout = layout; }
-		BufferLayout& GetLayout() { return m_BufferLayout; }
+		void SetLayout(BufferLayout& layout) { m_BufferLayout = &layout; }
+		BufferLayout& GetLayout() { return *m_BufferLayout; }
 
 	protected:
 
 		uint32_t m_BufferID;
-		BufferLayout m_BufferLayout;
+		BufferLayout* m_BufferLayout;
 	};
 
 	class IndexBuffer {

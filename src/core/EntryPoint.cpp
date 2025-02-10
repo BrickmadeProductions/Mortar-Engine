@@ -2,7 +2,7 @@
 
 #include "Application.h"
 #include "core/component/Camera.h"
-#include "core/renderer/universal/load/OBJLoader.h"
+#include "core/renderer/universal/load/Loader.h"
 #include <random>
 
 using namespace MortarCore;
@@ -18,54 +18,48 @@ float GRN(float min, float max) {
 
 int main(int argc, char** argv)
 {
+	
+	// INTIALIZATION \\
+
 	//runs intializations on creation (renderer, glfw, etc.)
 	auto app = new Application({ "Voxel Game",  RenderAPI::API::OPENGL, 1280, 720 });
-	
+
+	// LOAD RESOURCES \\
+
 	//load texture
 	Ref<Texture> wood = CreateRef<Texture>("resource/DirtTexture.png", 16, 16, true);
 	RenderCommands::CacheTexture(wood);
-
-	//get default material
+	//get default material (the render api makes it automatically)
 	Ref<Material> defaultMat = RenderCommands::GetCachedMaterial(0);
+	//load mesh used for all cubes
+	Ref<Model> CubeModel = OBJLoader::LoadObj("resource/Cube.obj");
+	//set material properties
+	CubeModel->GetMesh()->m_Material = defaultMat;
+	CubeModel->GetMesh()->m_Material->m_MainTex = wood;
+	
+	// //load monke model
+	// Ref<Model> MonkeyModel = OBJLoader::LoadObj("resource/Monkey.obj");
+	// MonkeyModel->GetMesh()->m_Material = defaultMat;
+	// MonkeyModel->GetMesh()->m_Material->m_MainTex = wood;
+	// LOAD OBJECTS \\
 
 	//instantiate player
 	Ref<Camera> player = app->GetScene().Instantiate<Camera>("Player");
 
-	Ref<Model> model = OBJLoader::LoadObj("resource/Cube.obj");
+	//instantiate 1000 blocks
+	Ref<RenderBatch> blockBatch = app->GetScene().InstantiateBatch<RenderEntity>("Block", CubeModel, 10000);
 
-	for (int i = 0; i < 1000; i++)
+	//randomly set values
+	for (auto& block : blockBatch->GetEntityBatch())
 	{
-		Ref<Entity> block = app->GetScene().Instantiate<Entity>("Block" + std::to_string(i));
-
-		//load model
-		block->LoadModel(model);
-		//load material
-		block->GetModel()->GetMesh()->m_Material = defaultMat;
-		//load texture
-		block->GetModel()->GetMesh()->m_Material->m_MainTex = wood;
-
-
-		block->Transform.position = glm::vec3(GRN(-200.0f, 200.0f), GRN(-200.0f, 200.0f), GRN(-200.0f, 200.0f));
+		block->Transform.position = glm::vec3(GRN(-500.0f, 500.0f), GRN(-500.0f, 500.0f), GRN(-500.0f, 500.0f));
 		block->Transform.rotation = glm::vec3(GRN(-360.0f, 360.0f), GRN(-360.0f, 360.0f), GRN(-360.0f, 360.0f));
-
 		block->Transform.scale = glm::vec3(GRN(0.5f, 5.0f));
 	}
-	
 
-	
-	// Ref<Entity> monkey = app->GetScene().Instantiate<Entity>("Monkey");
-
-	// //load model
-	// monkey->LoadModel(OBJLoader::LoadObj("resource/Monkey.obj"));
-	// //load material (0 is default material)
-	// monkey->GetModel()->GetMesh()->m_Material = RenderCommands::GetCachedMaterial(0);
-	// monkey->Transform.position = glm::vec3(0.0,0.0,10.0);
-	// monkey->Transform.scale = glm::vec3(2.0, 2.0, 2.0);
-
-
-	
 
 	//app loop
+	app->Initialize();
 	while (app->ShouldRun()) app->Run();
 	app->Close();
 

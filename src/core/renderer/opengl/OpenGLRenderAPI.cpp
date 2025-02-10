@@ -13,6 +13,12 @@ namespace MortarCore
 		
 	}
 
+    void GLAPIENTRY OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
+    {
+        if (severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM) MRT_PRINT_ERR(message);
+    }
+    
+
     int OpenGLRenderAPI::Init()
     {
         //Load OpenGL
@@ -37,6 +43,17 @@ namespace MortarCore
 
         MRT_CORE_ASSERT(!glGetError());
 
+        //debug
+        // Ensure that OpenGL debug output is enabled
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);  // Synchronize with the callback
+
+        // Register the debug callback function
+        glDebugMessageCallback(OpenGLDebugCallback, nullptr);
+
+        // Optional: You can specify the message severity you want to handle
+        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);  // Handle high severity messages
+
         return 1;
     }
 
@@ -58,17 +75,14 @@ namespace MortarCore
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         MRT_CORE_ASSERT(!glGetError());
     }
-    void OpenGLRenderAPI::DrawIndexed(const Ref<VertexArray>& VertexArray, uint32_t vertCount)
+
+    void OpenGLRenderAPI::DrawInstanced(const Ref<VertexArray>& VertexArray, uint32_t vertCount, uint32_t instanceCount) 
     {
         VertexArray->Bind();
-
-        //MRT_PRINT("Drawing Indexed Total Vert Data Count: " + std::to_string(vertCount));
-
-        glDrawElements(GL_TRIANGLES, vertCount, GL_UNSIGNED_INT, nullptr);
+        glDrawElementsInstanced(GL_TRIANGLES, vertCount, GL_UNSIGNED_INT, 0, instanceCount);
         MRT_CORE_ASSERT(!glGetError());
-
         VertexArray->Unbind();
-    } 
+    }
 
     void OpenGLRenderAPI::LoadTexture(Ref<Texture>& tex)
     {

@@ -9,36 +9,36 @@ namespace MortarCore
 	//application loop logic here
 	void Application::Run() 
 	{
-		clock_t beginFrame = clock();
+		auto startFrame = std::chrono::steady_clock::now();
 
-		//if a world is initialized, then run world functions
-		if (m_Scene != nullptr) 
+		//tick the world if we are at 60 ticks elapsed
+		if (m_TimeSinceLastTick >= 1.0f / 60.0f) 
 		{
-			//tick the world if we are at 60 ticks elapsed
-			if (m_TimeSinceLastTick >= 1.0f / 60.0f) 
-			{
 
-				m_Scene->Tick();
-				
-				m_CurrentTick++;
-				m_TimeSinceLastTick = 0;
-				
-			}
+			m_Scene->Tick();
+			
+			m_CurrentTick++;
+			m_TimeSinceLastTick = 0;
 
-			//update the frame by frame method that has the last frame time as a param
-			m_Scene->Update(GetFrameTime());
+			m_Window->UpdateTitle();
+			
 		}
+
+		//update the frame by frame method that has the last frame time as a param
+		m_Scene->Update(m_LastFrameTime);
+	
 
 		//render the scene and push to the windows frame buffer
 		m_Scene->Draw();
 		m_Window->Push();
 
-		clock_t endFrame = clock();
+		auto endFrame = std::chrono::steady_clock::now();
+		auto frameTime = std::chrono::duration_cast<std::chrono::microseconds>(endFrame - startFrame).count() / 1000.0 / 1000.0;
 
-		m_FrameTimes.push_back(double(endFrame - beginFrame) / 1000.0);
-		m_TimeSinceLastTick += GetFrameTime();
+		m_LastFrameTime = static_cast<double>(frameTime);
 
-		if (m_FrameTimes.size() > 100) m_FrameTimes.clear();
+		m_TimeSinceLastTick += m_LastFrameTime;
+
 	}
 
 	int Application::Close()

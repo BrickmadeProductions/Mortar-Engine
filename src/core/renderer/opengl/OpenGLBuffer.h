@@ -11,6 +11,7 @@ namespace MortarCore {
 
 		virtual void Bind() const override;
 		virtual void Unbind() const override;
+		virtual void UpdateBuffer(const void* verts, uint32_t size) const override;
 	};
 
 	class OpenGLIndexBuffer : public IndexBuffer {
