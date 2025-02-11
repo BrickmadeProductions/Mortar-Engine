@@ -16,12 +16,14 @@ namespace MortarCore {
 		~Window() = default;
 
 		GLFWwindow* GetNativeWindow() { return glfwwindow; }
+		
 
 		uint32_t GetWidth() { return windowWidth; }
 		uint32_t GetHeight() { return windowHeight; }
 
 		void Push();
 		void UpdateTitle();
+		void Shutdown();
 
 	private:
 

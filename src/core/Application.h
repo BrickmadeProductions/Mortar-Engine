@@ -37,9 +37,16 @@ namespace MortarCore
 
 			m_ThreadPool = CreateScope<ThreadPool>(32);
  			m_Window = CreateScope<Window>(spec.Title, spec.RenderAPI, spec.WinWidth, spec.WinHeight);
-			m_Scene = CreateScope<Scene>();
-			s_Instance = this;
 			m_LastFrameTime = 1.0;
+
+			s_Instance = this;
+		
+			//initialze static renderAPI
+			MRT_CORE_ASSERT(RenderCommands::InitializeAPI());
+			RenderCommands::SetClearColor(glm::vec4(0.5f, 0.8f, 0.9f, 1.0f));
+
+			m_Scene = CreateScope<Scene>();
+			m_Window->UpdateTitle();
 		}
 
 		virtual ~Application();

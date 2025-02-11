@@ -48,6 +48,9 @@ namespace MortarCore
             {
                 return s_RenderAPI->GetCachedTextures()[index];
             }
+            static Scope<RenderAPI>& GetRenderAPI() {
+                return s_RenderAPI;
+            }
 
         private:
 

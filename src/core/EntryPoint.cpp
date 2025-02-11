@@ -27,12 +27,12 @@ int main(int argc, char** argv)
 	// LOAD RESOURCES \\
 
 	//load texture
-	Ref<Texture> wood = CreateRef<Texture>("resource/DirtTexture.png", 16, 16, true);
+	Ref<Texture> wood = CreateRef<Texture>("resource/texture/DirtTexture.png", 16, 16, true);
 	RenderCommands::CacheTexture(wood);
 	//get default material (the render api makes it automatically)
 	Ref<Material> defaultMat = RenderCommands::GetCachedMaterial(0);
 	//load mesh used for all cubes
-	Ref<Model> CubeModel = OBJLoader::LoadObj("resource/Cube.obj");
+	Ref<Model> CubeModel = OBJLoader::LoadObj("resource/model/Cube.obj");
 	//set material properties
 	CubeModel->GetMesh()->m_Material = defaultMat;
 	CubeModel->GetMesh()->m_Material->m_MainTex = wood;
@@ -47,7 +47,7 @@ int main(int argc, char** argv)
 	Ref<Camera> player = app->GetScene().Instantiate<Camera>("Player");
 
 	//instantiate 1000 blocks
-	Ref<RenderBatch> blockBatch = app->GetScene().InstantiateBatch<RenderEntity>("Block", CubeModel, 10000);
+	Ref<RenderBatch> blockBatch = app->GetScene().InstantiateBatch<RenderEntity>("Block", CubeModel, 1);
 
 	//randomly set values
 	for (auto& block : blockBatch->GetEntityBatch())

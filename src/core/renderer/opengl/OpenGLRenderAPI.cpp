@@ -1,6 +1,10 @@
 #pragma once
 
 #include "OpenGLRenderAPI.h"
+#include "core/Application.h"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 namespace MortarCore
 {
@@ -10,7 +14,7 @@ namespace MortarCore
 	}
 	OpenGLRenderAPI::~OpenGLRenderAPI() 
 	{ 
-		
+		ImGui_ImplOpenGL3_Shutdown();
 	}
 
     void GLAPIENTRY OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
@@ -54,6 +58,12 @@ namespace MortarCore
         // Optional: You can specify the message severity you want to handle
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);  // Handle high severity messages
 
+        // Imgui
+		ImGui_ImplGlfw_InitForOpenGL(Application::GetWindow().GetNativeWindow(), true);
+        MRT_CORE_ASSERT(Application::GetWindow().GetNativeWindow());
+
+        ImGui_ImplOpenGL3_Init();
+
         return 1;
     }
 
@@ -82,6 +92,23 @@ namespace MortarCore
         glDrawElementsInstanced(GL_TRIANGLES, vertCount, GL_UNSIGNED_INT, 0, instanceCount);
         MRT_CORE_ASSERT(!glGetError());
         VertexArray->Unbind();
+    }
+
+    void OpenGLRenderAPI::PreFrame() {
+		ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+        // ImGuiID windowDockspace = ImGui::DockSpaceOverViewport();
+        // MRT_CORE_ASSERT(windowDockspace)
+
+		ImGui::ShowDemoWindow();
+    }
+
+    void OpenGLRenderAPI::PostFrame() {
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        ImGui::UpdatePlatformWindows();
     }
 
     void OpenGLRenderAPI::LoadTexture(Ref<Texture>& tex)
