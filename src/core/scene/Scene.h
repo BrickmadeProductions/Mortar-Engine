@@ -13,18 +13,7 @@ namespace MortarCore {
 	{
 	public:
 
-		Scene() 
-		{
-			//TODO load default shaders and materials (move to abstraction later)
-			Ref<Shader> defaultShader = Shader::CreateProgram("resource/shader/defaultSpatial.vert", "resource/shader/defaultSpatial.frag");
-
-			MRT_PRINT("Default Shader Loaded...");
-			Ref<Material> defaultMat = CreateRef<Material>(defaultShader);
-			
-			MRT_PRINT("Default Material Loaded...");
-			RenderCommands::CacheMaterial(defaultMat);
-		}
-		
+		Scene() = default;
 		Scene(const Scene& scene) = default;
 		~Scene() = default;
 
@@ -34,7 +23,7 @@ namespace MortarCore {
 		template <class T>
 		Ref<T> Instantiate(std::string name) 
 		{
-			if (m_GameObjectsByName.contains(name)) 
+			if (m_EntitiesByName.contains(name)) 
 			{
 				MRT_PRINT_ERR("ENTITY WITH THIS NAME ALREADY EXISTS")
 				return nullptr;
@@ -44,48 +33,27 @@ namespace MortarCore {
 			
 			Ref<T> entity = CreateRef<T>(name);
 
-			//add the ref to both maps
-			m_GameObjects.emplace(m_InstanceNonce, entity);
-			m_GameObjectsByName.emplace(name, entity);
+			//add to EntitiesList
+			m_Entities.emplace(m_InstanceNonce, entity);
+			m_EntitiesByName.emplace(entity->Name, entity);
 			
 			//Call the awake function
 			entity->Awake();
-
-			MRT_PRINT("Entity " + std::string(typeid(T).name()) + " Instantiated With ID: " + std::to_string(m_InstanceNonce));
-
+			
 			return entity;
 		}
 
-		//Instantiates a batch of entities based on the model inserted (they will be drawn in one call)
-		template <class T>
-		Ref<RenderBatch> InstantiateBatch(std::string EntityName, Ref<Model> model, int amount) 
-		{			
-			std::vector<Ref<T>> batchEntites;
-			for (int i = 0; i < amount; i++)
-			{
-				Ref<T> entity = Instantiate<T>(std::string(EntityName + std::to_string(i)));
-				entity->SetModel(model);
-
-				batchEntites.push_back(entity);
-			}
-
-			Ref<RenderBatch> batch = CreateRef<RenderBatch>(batchEntites);
-			m_RenderBatches.push_back(batch);
-
-			return batch;
-			
-		}
 
 		template <typename T>
-		Ref<T> GetEntity(uint32_t objectID) { return m_GameObjects[objectID]; }
+		Ref<T> GetEntity(uint32_t objectID) { return m_Entities[objectID]; }
 		
 		template <typename T>
-		Ref<T> GetEntity(std::string name) { return m_GameObjectsByName[name]; }
+		Ref<T> GetEntity(std::string name) { return m_EntitiesByName[name]; }
 		
 		template <typename T>
 		Ref<T> GetEntity() 
 		{ 
-			for (const auto& entityPair : m_GameObjects) 
+			for (const auto& entityPair : m_Entities) 
 			{
 				auto& entity = entityPair.second;
 
@@ -101,7 +69,7 @@ namespace MortarCore {
 		template <typename T>
 		Ref<T> GetEntity(const std::function<bool(const Ref<Entity>)>& testCondition) 
 		{ 
-			for (const auto& entityPair : m_GameObjects) 
+			for (const auto& entityPair : m_Entities) 
 			{
 				auto& entity = entityPair.second;
 
@@ -118,22 +86,19 @@ namespace MortarCore {
 		void Awake() 
 		{ 
 			MRT_PROF();
-			for (const auto& e : m_GameObjects) 
+			
+			for (const auto& e : m_Entities) 
 			{
-				if (!e.second->IsActive) continue;
 				//get current camera by last active
-				else if (e.second->IsEntityOfType<Camera>()) {
-					m_MainCamera = e.second->Get<Camera>();
-				}
-
-				e.second->Awake(); 
+				if (e.second->IsType<Camera>() && e.second->IsActive) m_MainCamera = e.second->Get<Camera>();
+				if (e.second->IsType<RenderEntity3D>()) e.second->Get<RenderEntity3D>()->BuildRenderData();
 			}
 		}
 		//Called every frame
 		void Update(double delta) 
 		{ 
 			MRT_PROF();
-			for (const auto& e : m_GameObjects) 
+			for (const auto& e : m_Entities) 
 			{
 				if (!e.second->IsActive) continue;
 				e.second->Update(delta); 
@@ -145,7 +110,7 @@ namespace MortarCore {
 		{ 
 			
 			MRT_PROF();
-			for (const auto& e : m_GameObjects) 
+			for (const auto& e : m_Entities) 
 			{ 
 				if (!e.second->IsActive) continue; 
 				e.second->Tick(); 
@@ -154,19 +119,17 @@ namespace MortarCore {
 		//Called every time the scene is about to draw
 		void Draw() 
 		{ 
+			
 			MRT_PROF();
 			//clear screen
 			RenderCommands::Clear();
 
 			//submit batches to renderer
-			for (auto& rb : m_RenderBatches) Renderer::Submit(rb);
-
-			for (const auto& e : m_GameObjects) 
+			for (const auto& e : m_Entities) 
 			{
 				if (!e.second->IsActive) continue;
-
-				//call its post draw function
-				e.second->PostDraw(); 
+				//call its draw function
+				e.second->Draw(); 
 			}
 		}
 		
@@ -174,10 +137,8 @@ namespace MortarCore {
 
 		Camera* m_MainCamera;
 
-		std::unordered_map<uint32_t, Ref<Entity>> m_GameObjects;
-		std::unordered_map<std::string, Ref<Entity>> m_GameObjectsByName;
-
-		std::vector<Ref<RenderBatch>> m_RenderBatches;
+		std::unordered_map<uint32_t, Ref<Entity>> m_Entities;
+		std::unordered_map<std::string, Ref<Entity>> m_EntitiesByName;
 
 		uint32_t m_InstanceNonce = 0;
 	};

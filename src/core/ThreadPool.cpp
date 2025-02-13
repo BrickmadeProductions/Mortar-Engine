@@ -37,13 +37,13 @@ namespace MortarCore
             activeThreads.fetch_sub(1, std::memory_order_relaxed);
 
             // Notify the wait condition
-            waitCondition.notify_all();
+            condition.notify_all();
         }
     }
 
     void ThreadPool::Wait() {
         std::unique_lock<std::mutex> lock(queueMutex);
-        waitCondition.wait(lock, [this] { 
+        condition.wait(lock, [this] { 
             return tasks.empty() && activeThreads.load() == 0; 
         });
     }

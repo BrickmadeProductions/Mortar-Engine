@@ -26,5 +26,20 @@ namespace MortarCore
 
 			default: return nullptr;
 		}
+
+
 	}
+
+	Ref<ShaderStorageBuffer> ShaderStorageBuffer::CreateBuffer(const void* data, uint32_t size) 
+	{
+		switch (RenderAPI::GetAPI())
+		{
+			case RenderAPI::API::OPENGL: return CreateRef<OpenGLShaderStorageBuffer>(data, size);
+
+			case RenderAPI::API::VULKAN: return nullptr;
+
+			default: return nullptr;
+		}
+	}
+
 }

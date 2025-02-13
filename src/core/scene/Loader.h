@@ -2,13 +2,15 @@
 
 #include "Utils.h"
 #include "core/renderer/universal/Buffer.h"
-#include "core/renderer/universal/Material.h"
-#include "core/renderer/universal/Mesh.h"
-#include "core/renderer/universal/Model.h"
+#include "core/resource/Mesh.h"
+#include "core/resource/Model.h"
 #include "core/renderer/universal/Shader.h"
 
 namespace MortarCore
 {
+    static std::string _resHeader = "[mrt_resource_type";
+    static std::string _subResHeader = "[mrt_subres_type";
+
     struct FaceComparator {
         bool operator()(const std::tuple<uint32_t, uint32_t, uint32_t>& a, const std::tuple<uint32_t, uint32_t, uint32_t>& b) const {
             // Compare first elements
@@ -20,11 +22,108 @@ namespace MortarCore
         }
     };
     
-    class OBJLoader
+    struct Vertex
+    {
+        glm::vec3 position;
+        glm::vec3 normal;
+        glm::vec2 texCoord;
+    };
+
+    class Loader
     {
     public:
     
-        static Ref<Model> LoadObj(const std::string& filepath) 
+        template<class T>
+        static Ref<T> LoadResource(const char * resourcePath)
+        {
+            std::string resourceType;
+
+            //variabletype, dataName, value
+            std::map<std::string, std::vector<std::pair<std::string, std::string>>> data;
+
+            //file loading
+            std::ifstream file(resourcePath);
+            std::string line;
+
+            MRT_CORE_ASSERT(file.is_open());
+
+            //read header
+            std::getline(file, line);
+            if (line.find(_resHeader) == std::string::npos) {
+                MRT_PRINT_ERR("FAILURE LOADING RESOURCE: COULD NOT VERIFY RESOURCE TYPE");
+                return nullptr;
+            }
+            size_t typePosition = line.find("=");
+            if (typePosition != std::string::npos)
+            {
+                //load resource type
+                std::stringstream ss(line.substr(typePosition + 1));
+                std::string type;
+                ss >> type;
+            
+                type.pop_back(); //remove the ]
+                resourceType = type;
+
+            }
+
+            //read file
+            while (std::getline(file, line))
+            {
+                if (line.empty()) continue;
+
+                std::stringstream ss(line);
+                std::string type, name, Data;
+                ss >> type >> name >> Data;
+
+                //insert the type
+                data[type].push_back(std::make_pair(name, Data));
+
+            }
+
+            //return the object
+            if constexpr (std::is_same<T, Texture>::value)
+            {
+                const char* texPath = data["str"][0].second.c_str();
+                int width = std::stoi(data["int"][0].second);
+                int height = std::stoi(data["int"][1].second);
+                int channels = std::stoi( data["int"][2].second);
+
+                Ref<Texture> tex = CreateRef<Texture>(texPath, width, height, channels);
+                RenderCommands::LoadTexture(tex);
+                return tex;
+            }
+            else if constexpr (std::is_same<T, Shader>::value)
+            {
+                //vert + frag shader (render shader)
+                if (data["str"][0].first == "Vert")
+                {                
+                    const char* vert = data["str"][0].second.c_str();                
+                    const char* frag = data["str"][1].second.c_str();
+                    return Shader::CreateProgram(vert, frag);
+
+                }
+                //compute shader
+                else 
+                {
+                    const char* comp = data["str"][0].second.c_str();    
+                    return Shader::CreateProgram(comp);        
+                }
+
+                
+            }
+            else if constexpr (std::is_same<T, Model>::value)
+            {
+                const char* modelPath = data["str"][0].second.c_str();
+                return LoadObj(modelPath);
+            }
+            else 
+            {
+                MRT_PRINT_ERR("UNKOWN RESOURCE TYPE!");
+                return nullptr;
+            }  
+        }
+
+        static Ref<Model> LoadObj(const char* modelPath) 
         {
             
             //vertexMapping
@@ -35,13 +134,12 @@ namespace MortarCore
             std::vector<glm::vec3> normals;
             std::vector<glm::vec2> texCoords;
 
-            //vertex data(packed format: POSX,POSY,POSZ,NORMX,NORMY,NORMZ,UVX,UVY)
-            std::vector<float> vertexRawBuffer;
+            std::vector<Vertex> vertexRawBuffer;
             //vertex indicies (packed as pointers to vertexRawBuffer stride)
             std::vector<uint32_t> indicesRawBuffer;
 
             //file loading
-            std::ifstream file(filepath);
+            std::ifstream file(modelPath);
             std::string line;
 
             MRT_CORE_ASSERT(file.is_open());
@@ -122,36 +220,30 @@ namespace MortarCore
                             //{
                             //push position data
                             glm::vec3 pos = positions[v - 1]; 
-                            vertexRawBuffer.push_back(pos.x);
-                            vertexRawBuffer.push_back(pos.y);
-                            vertexRawBuffer.push_back(pos.z);
+                            Vertex newVertex;
+                            newVertex.position = pos;
 
                             //push normals and tex coords if we have them, if we don't then push 0s
                             if (n > 0)
                             {
-                                glm::vec3 normal = normals[n - 1]; 
-                                
-                                vertexRawBuffer.push_back(normal.x);
-                                vertexRawBuffer.push_back(normal.y);
-                                vertexRawBuffer.push_back(normal.z);
+                                newVertex.normal = normals[n - 1];
                             }
                             else 
                             {
-                                vertexRawBuffer.push_back(0.0);
-                                vertexRawBuffer.push_back(0.0);
-                                vertexRawBuffer.push_back(0.0);
+                                newVertex.normal = glm::vec3(0.0);
                             }
                             if (t > 0)
                             {
-                                glm::vec2 texCoord = texCoords[t - 1]; 
-                                vertexRawBuffer.push_back(texCoord.x);
-                                vertexRawBuffer.push_back(texCoord.y);
+                                newVertex.texCoord = texCoords[t - 1];
+          
                             }
                             else
                             {
-                                vertexRawBuffer.push_back(0.0);
-                                vertexRawBuffer.push_back(0.0);
+                                newVertex.texCoord =  glm::vec2(0.0);
                             }
+
+
+                            vertexRawBuffer.push_back(newVertex);
                             //}
                         
                             
@@ -166,9 +258,7 @@ namespace MortarCore
             
             file.close();
             
-            MRT_PRINT("Obj File Parsed.. ");
-
-            MRT_PRINT("Total Indicies " + indicesRawBuffer.size());    
+            MRT_PRINT("Obj File Parsed.. "); 
 
             BufferLayout objLayout =
             {
@@ -180,10 +270,10 @@ namespace MortarCore
             };
 
             //create mesh, pass in the vertex data
-            Ref<Mesh> mesh = CreateRef<Mesh>(vertexRawBuffer, indicesRawBuffer, objLayout);
+            std::vector<char> flatBuffer = Buffer::Flatten<Vertex>(vertexRawBuffer);
+            Ref<Mesh> mesh = CreateRef<Mesh>(flatBuffer, indicesRawBuffer, objLayout);
             //create mesh (if there is multiple meshes we will load multiple)
             //we now have a valid model
-            MRT_PRINT("Mesh Created!...");
 
             Ref<Model> model = CreateRef<Model>(mesh);
 

@@ -99,6 +99,64 @@ namespace MortarCore {
 			std::vector<ShaderElement> m_Elements;
 	};
 
+	class Buffer
+	{
+	public:
+		template <typename T>
+		static std::vector<char> Flatten(const T& data) 
+		{
+			// Calculate the size of the struct
+			size_t size = sizeof(T);
+			
+			// Create a vector of raw bytes with the size of the struct
+			std::vector<char> buffer(size);
+			
+			// Copy the contents of the struct into the buffer
+			std::memcpy(buffer.data(), &data, size);
+		
+			return buffer;
+		}
+
+		template <typename T>
+		static std::vector<char> Flatten(const std::vector<T>& data) 
+		{
+			std::vector<char> buffer;
+			for (auto& s : data){
+
+				std::vector<char> structBuffer = Buffer::Flatten(s);
+
+				buffer.insert(buffer.end(), structBuffer.begin(), structBuffer.end());
+			}
+
+			return buffer;
+			
+		}
+		template <typename T>
+		static std::vector<T> Deflatten(const std::vector<char>& buffer) 
+		{
+			std::vector<T> data;
+			size_t structSize = sizeof(T);  // Size of each element of type T
+			size_t numElements = buffer.size() / structSize;  // Calculate the number of elements in the buffer
+		
+			// Ensure the buffer size is a multiple of struct size
+			if (buffer.size() % structSize != 0) {
+				std::cerr << "Error: The buffer size is not a multiple of the struct size." << std::endl;
+				return data;
+			}
+		
+			// Deserialize each element
+			for (size_t i = 0; i < numElements; ++i) {
+				T element;
+				// Copy the struct-sized chunk of the buffer into the element
+				std::memcpy(&element, &buffer[i * structSize], structSize);
+				data.push_back(element);
+			}
+		
+			return data;
+		}
+	
+	};
+
 	class VertexBuffer {
 
 	public:
@@ -113,6 +171,8 @@ namespace MortarCore {
 		
 		void SetLayout(BufferLayout& layout) { m_BufferLayout = &layout; }
 		BufferLayout& GetLayout() { return *m_BufferLayout; }
+
+		uint32_t GetID() { return m_BufferID; }
 
 	protected:
 
@@ -132,10 +192,31 @@ namespace MortarCore {
 		static Ref<IndexBuffer> CreateBuffer(uint32_t* indicies, uint32_t size);
 
 		uint32_t GetIndexCount() { return m_IndexCount; }
+		uint32_t GetID() { return m_BufferID; }
 
 	protected:
 
 		uint32_t m_BufferID;
 		uint32_t m_IndexCount;
+	};
+
+	class ShaderStorageBuffer
+	{
+	public:
+
+		virtual ~ShaderStorageBuffer() = default;
+
+		virtual void Bind() const = 0;
+		virtual void Dispatch(uint32_t computeThreads) const = 0;
+
+		static Ref<ShaderStorageBuffer> CreateBuffer(const void* data, uint32_t size);
+
+		uint32_t GetID() { return m_BufferID; }
+
+
+	protected:
+
+		uint32_t m_BufferID;
+
 	};
 }

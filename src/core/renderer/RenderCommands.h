@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/renderer/RenderAPI.h"
+#include "core/renderer/universal/Shader.h"
 #include "Utils.h"
 
 //this class creates calls to the virtual renderAPI scope that is defined through window creation
@@ -30,23 +31,9 @@ namespace MortarCore
             {
                 s_RenderAPI->DrawInstanced(VertexArray, vertCount, instanceCount);
             }
-
-            //cache
-            static void CacheMaterial(Ref<Material> mat)
-            { 
-                s_RenderAPI->GetCachedMaterials().push_back(mat); 
-            }
-            static Ref<Material> GetCachedMaterial(uint32_t index)
-            { 
-                return s_RenderAPI->GetCachedMaterials()[index];
-            }
-            static void CacheTexture(Ref<Texture> tex)
+            static void LoadTexture(Ref<Texture> tex)
             {
                 s_RenderAPI->LoadTexture(tex);
-            }
-            static Ref<Texture> GetCachedTexture(uint32_t index)
-            {
-                return s_RenderAPI->GetCachedTextures()[index];
             }
 
         private:

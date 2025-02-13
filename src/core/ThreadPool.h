@@ -31,7 +31,7 @@ namespace MortarCore
             // Synchronization objects
             std::mutex queueMutex;
             std::condition_variable condition;
-            std::condition_variable waitCondition;
+
         
             // List of worker threads
             std::vector<std::thread> workers;

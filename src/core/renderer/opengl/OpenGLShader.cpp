@@ -4,60 +4,84 @@ namespace MortarCore {
 
 	OpenGLShader::OpenGLShader(const char* vertexFilePath, const char* fragmentFilePath)
 	{
+		if (!vertexFilePath || !fragmentFilePath) MRT_CORE_ASSERT(false);
 
 		std::string vertSourceStr = ReadFileContents(vertexFilePath);
 		std::string fragSourceStr = ReadFileContents(fragmentFilePath);
 
 		const char* vertSource = vertSourceStr.c_str();
 		const char* fragSource = fragSourceStr.c_str();
+
 		//VERT
-		
 		GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-
-		MRT_CORE_ASSERT(!glGetError());
-		
-		glShaderSource(vertexShader, 1, &vertSource, NULL);
-
-		MRT_CORE_ASSERT(!glGetError());
-
+		glShaderSource(vertexShader, 1, &vertSource, nullptr);
 		glCompileShader(vertexShader);
 		CompileErrors("VERTEX", vertexShader);
 		MRT_CORE_ASSERT(!glGetError());
-
+		
 		//FRAG
 		GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-		MRT_CORE_ASSERT(!glGetError());
-
-		glShaderSource(fragmentShader, 1, &fragSource, NULL);
-		MRT_CORE_ASSERT(!glGetError());
-
+		glShaderSource(fragmentShader, 1, &fragSource, nullptr);
 		glCompileShader(fragmentShader);
 		CompileErrors("FRAGMENT", fragmentShader);
 		MRT_CORE_ASSERT(!glGetError());
 
 		m_ProgramID = glCreateProgram();
-		MRT_CORE_ASSERT(!glGetError());
 
 		glAttachShader(m_ProgramID, vertexShader);
-		MRT_CORE_ASSERT(!glGetError());
-
 		glAttachShader(m_ProgramID, fragmentShader);
 		MRT_CORE_ASSERT(!glGetError());
 
+
 		glLinkProgram(m_ProgramID);
 		glValidateProgram(m_ProgramID);
-		MRT_CORE_ASSERT(!glGetError());
 
 		CompileErrors("PROGRAM", m_ProgramID);
+		MRT_CORE_ASSERT(!glGetError());
 
 		glDeleteShader(vertexShader);
-		MRT_CORE_ASSERT(!glGetError());
-
 		glDeleteShader(fragmentShader);
+
+		MRT_CORE_ASSERT(!glGetError());
+		MRT_PRINT_WARN("Vert + Frag Shader Program Successfully Created...")
+		
+
+	}
+
+	OpenGLShader::OpenGLShader(const char* computeFilePath)
+	{
+		if (!computeFilePath) MRT_CORE_ASSERT(false);
+
+		std::string computeSourcstr = ReadFileContents(computeFilePath);
+
+		const char* computeSource = computeSourcstr.c_str();
+
+		//COMPUTE
+		GLuint computeShader = glCreateShader(GL_COMPUTE_SHADER);
+		glShaderSource(computeShader, 1, &computeSource, nullptr);
+		glCompileShader(computeShader);
+		CompileErrors("COMPUTE", computeShader);
 		MRT_CORE_ASSERT(!glGetError());
 
-		MRT_PRINT_WARN("Shader Program Successfully Created...")
+		m_ProgramID = glCreateProgram();
+
+		glAttachShader(m_ProgramID, computeShader);
+		MRT_CORE_ASSERT(!glGetError());
+
+
+		glLinkProgram(m_ProgramID);
+		glValidateProgram(m_ProgramID);
+
+		CompileErrors("PROGRAM", m_ProgramID);
+		MRT_CORE_ASSERT(!glGetError());
+
+		glDeleteShader(computeShader);
+
+		MRT_CORE_ASSERT(!glGetError());
+		MRT_PRINT_WARN("Compute Shader Program Successfully Created...")
+
 	}
+	
 	
 	OpenGLShader::~OpenGLShader()
 	{ 
@@ -130,13 +154,12 @@ namespace MortarCore {
 		MRT_CORE_ASSERT(!glGetError());
 	}
 
-	void OpenGLShader::LinkTexture(uint32_t textureID, const char* location) const
+	void OpenGLShader::LinkTexture(uint32_t textureID, uint32_t textureUnit, const char* location) const
 	{
-		GLuint unit = 0;
-
-		glActiveTexture(GL_TEXTURE0 + unit);
+		glActiveTexture(GL_TEXTURE0 + textureUnit);
 		glBindTexture(GL_TEXTURE_2D, textureID);
-		glUniform1i(GetUnformLocation(location), unit);
+		glUniform1i(GetUnformLocation(location), textureUnit);
+		MRT_CORE_ASSERT(!glGetError())
 	}
 
 	void OpenGLShader::BindAttrib(uint32_t attrib, const char* location) const
@@ -147,12 +170,13 @@ namespace MortarCore {
 
 	void OpenGLShader::CompileErrors(const char* type, uint32_t shaderID) const
 	{
-		GLint hasCompiled;
 		char* infoLog;
 		GLint infoLogLength;
 
 		if (type != "PROGRAM")
 		{
+			GLint hasCompiled;
+
 			glGetShaderiv(shaderID, GL_COMPILE_STATUS, &hasCompiled);
 
 			if (hasCompiled == GL_FALSE)
@@ -160,28 +184,49 @@ namespace MortarCore {
 				glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
 				infoLog = new char[infoLogLength];
 
-				glGetShaderInfoLog(shaderID, infoLogLength, NULL, infoLog);
+				glGetShaderInfoLog(shaderID, infoLogLength, &infoLogLength, infoLog);
 
 				MRT_PRINT_ERR(std::string(type) + " Shader Failed To Compile: " + std::string(infoLog));
-				MRT_CORE_ASSERT(hasCompiled);
+
 			}
+			MRT_CORE_ASSERT(hasCompiled);
 		}
 		else
 		{
-			glGetProgramiv(shaderID, GL_LINK_STATUS, &hasCompiled);
+			GLint hasLinked, hasValidated;
+			
 
-			if (hasCompiled == GL_FALSE)
+			glGetProgramiv(shaderID, GL_LINK_STATUS, &hasLinked);
+			glGetProgramiv(shaderID, GL_VALIDATE_STATUS, &hasValidated);
+
+			if (hasLinked == GL_FALSE)
 			{
 				
 				glGetProgramiv(shaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
 
 				infoLog = new char[infoLogLength];
 
-				glGetProgramInfoLog(shaderID, infoLogLength, NULL, infoLog);
+				glGetProgramInfoLog(shaderID, infoLogLength, &infoLogLength, infoLog);
 
-				MRT_PRINT_ERR("Shader Program Failed To Compile: " + std::string(infoLog));
-				MRT_CORE_ASSERT(hasCompiled);
+				MRT_PRINT_ERR("Shader PROGRAM Failed To Link: " + std::string(infoLog));
+				
 			}
+
+
+			if (hasValidated == GL_FALSE)
+			{
+				
+				glGetProgramiv(shaderID, GL_INFO_LOG_LENGTH, &infoLogLength);
+
+				infoLog = new char[infoLogLength];
+
+				glGetProgramInfoLog(shaderID, infoLogLength, &infoLogLength, infoLog);
+
+				MRT_PRINT_ERR("Shader PROGRAM Failed To Validate: " + std::string(infoLog));
+				
+			}
+			MRT_CORE_ASSERT(hasLinked);
+			MRT_CORE_ASSERT(hasValidated);
 		}
 
 		

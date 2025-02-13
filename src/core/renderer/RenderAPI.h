@@ -29,19 +29,15 @@ namespace MortarCore
 
         virtual void LoadTexture(Ref<Texture>& texture) = 0;
 
-        std::vector<Ref<Material>>& GetCachedMaterials() { return m_CachedMaterials; }
-        std::vector<Ref<Texture>>& GetCachedTextures() { return m_CachedTextures; }
-
         static API GetAPI() { return s_API; }
         static void SetAPI(API api) { s_API = api; }
 
         static Scope<RenderAPI> Create();
 
     protected:
-
+    
+        static uint32_t s_CurrentTextureUnit;
         static API s_API;
-        std::vector<Ref<Material>> m_CachedMaterials;
-        std::vector<Ref<Texture>> m_CachedTextures;
 
     };
 

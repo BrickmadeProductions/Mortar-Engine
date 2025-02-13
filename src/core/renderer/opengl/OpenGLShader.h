@@ -9,6 +9,7 @@ namespace MortarCore {
 	public:
 
 		OpenGLShader(const char* vertexFilePath, const char* fragmentFilePath);
+		OpenGLShader(const char* computePath);
 		virtual ~OpenGLShader();
 
 		virtual void Activate() const override;
@@ -22,7 +23,7 @@ namespace MortarCore {
 		virtual void SetVec4(glm::vec4 v4, const char* location) const override;
 		virtual void SetMat4(glm::mat4x4 m4, const char* location) const override;
 
-		virtual void LinkTexture(uint32_t textureID, const char* location) const override;
+		virtual void LinkTexture(uint32_t textureID, uint32_t textureUnit, const char* location) const override;
 
 		virtual void BindAttrib(uint32_t attrib, const char* location) const override;
 

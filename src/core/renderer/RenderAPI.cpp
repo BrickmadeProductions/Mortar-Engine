@@ -6,6 +6,7 @@ namespace MortarCore
     
     //intiailize to opengl, we can change it in the initializer
     RenderAPI::API RenderAPI::s_API = RenderAPI::API::OPENGL;
+    uint32_t RenderAPI::s_CurrentTextureUnit = 0;
 
     Scope<RenderAPI> RenderAPI::Create()
     {

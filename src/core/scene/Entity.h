@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Utils.h"
-#include "core/renderer/universal/Model.h"
+#include "core/resource/Model.h"
 #include "core/math/Transform.h"
 
 namespace MortarCore
@@ -26,18 +26,13 @@ namespace MortarCore
             virtual void Update(double delta) {}
             
             //Called after this object gets its model drawn, but hasn't been pushed to the screen yet
-            virtual void PostDraw() {}
+            virtual void Draw() {}
 
             template <class T>
-            inline bool IsEntityOfType()
-            {
-                return dynamic_cast<T*>(this) != nullptr;
-            }
+            inline bool IsType(){ return dynamic_cast<T*>(this) != nullptr; }
+
             template <class T>
-            inline T* Get()
-            {
-                return dynamic_cast<T*>(this);
-            }
+            inline T* Get() { return dynamic_cast<T*>(this); }
 
         public:
             std::string Name;

@@ -15,7 +15,7 @@ namespace MortarCore
 
     void GLAPIENTRY OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
     {
-        if (severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM) MRT_PRINT_ERR(message);
+        if (severity == GL_DEBUG_SEVERITY_HIGH && type == GL_DEBUG_TYPE_ERROR) { MRT_PRINT_ERR(message); }
     }
     
 
@@ -36,6 +36,7 @@ namespace MortarCore
 
         //ENABLE WHEN STABLE
         glEnable(GL_CULL_FACE);
+
         glFrontFace(GL_CCW);
 
 		MRT_PRINT("OpenGL version: ");
@@ -79,25 +80,26 @@ namespace MortarCore
     void OpenGLRenderAPI::DrawInstanced(const Ref<VertexArray>& VertexArray, uint32_t vertCount, uint32_t instanceCount) 
     {
         VertexArray->Bind();
-        glDrawElementsInstanced(GL_TRIANGLES, vertCount, GL_UNSIGNED_INT, 0, instanceCount);
-        MRT_CORE_ASSERT(!glGetError());
+        glDrawElementsInstanced(GL_TRIANGLES, vertCount, GL_UNSIGNED_INT, (void*)0, instanceCount);
         VertexArray->Unbind();
+        MRT_CORE_ASSERT(!glGetError());
     }
 
     void OpenGLRenderAPI::LoadTexture(Ref<Texture>& tex)
     {
+        s_CurrentTextureUnit++;
+
         // Step 2: Generate an OpenGL texture
         GLuint textureID;
         glGenTextures(1, &textureID);
         glBindTexture(GL_TEXTURE_2D, textureID);
 
         tex->SetTextureID(textureID);
+        tex->SetTextureUnit(s_CurrentTextureUnit);
 
         // Step 3: Upload the image data to OpenGL
         GLenum format = GL_RGB; // Default format (for RGB images)
-        if (tex->GetChannels() == 4) {
-            format = GL_RGBA; // Use RGBA if the image has an alpha channel
-        }
+        if (tex->GetChannels() == 4)  format = GL_RGBA; // Use RGBA if the image has an alpha channel           
 
         // Upload image data to OpenGL (use the data with the correct format)
         glTexImage2D(GL_TEXTURE_2D, 0, format, tex->GetWidth(), tex->GetHeight(), 0, format, GL_UNSIGNED_BYTE, tex->GetData());
@@ -113,8 +115,5 @@ namespace MortarCore
         
         // Step 6: Free image data after uploading it to the GPU
         ImageLoader::FreeImage(tex->GetData());
-
-        //cach the texture
-        m_CachedTextures.push_back(tex);
     }
 }

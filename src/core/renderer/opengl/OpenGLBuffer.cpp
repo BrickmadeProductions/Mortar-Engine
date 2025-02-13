@@ -2,7 +2,9 @@
 
 namespace MortarCore {
 
+	////////////////
 	//VERTEX BUFFER
+	////////////////
 
 	OpenGLVertexBuffer::OpenGLVertexBuffer(const void* verts, uint32_t size)
 	{
@@ -36,7 +38,9 @@ namespace MortarCore {
 		MRT_CORE_ASSERT(!glGetError());
 	}
 
+	//////////////
 	//INDEX BUFFER
+	//////////////
 
 	OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* indicies, uint32_t size)
 	{
@@ -68,6 +72,40 @@ namespace MortarCore {
 	void OpenGLIndexBuffer::Unbind() const
 	{
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		MRT_CORE_ASSERT(!glGetError());
+	}
+
+	/////////////////
+	//FEEDBACK BUFFER
+	/////////////////
+	
+	OpenGLShaderStorageBuffer::OpenGLShaderStorageBuffer(const void* data, uint32_t size)
+	{
+		glGenBuffers(1, &m_BufferID);
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_BufferID);
+
+		glBufferData(GL_SHADER_STORAGE_BUFFER, size, data, GL_DYNAMIC_DRAW);
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+		MRT_CORE_ASSERT(!glGetError());
+	}
+	OpenGLShaderStorageBuffer::~OpenGLShaderStorageBuffer() 
+	{ 
+		glDeleteBuffers(1, &m_BufferID);
+		MRT_CORE_ASSERT(!glGetError());
+	}
+
+	void OpenGLShaderStorageBuffer::Bind() const
+	{
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_BufferID);
+	}
+
+	void OpenGLShaderStorageBuffer::Dispatch(uint32_t computeThreads) const
+	{ 		
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_BufferID);
+		// Dispatch the compute shader with one workgroup per particle
+		glDispatchCompute(computeThreads, 1, 1);  // Adjust based on the number of particles
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT); // Ensure data is written to the buffer
 		MRT_CORE_ASSERT(!glGetError());
 	}
 }

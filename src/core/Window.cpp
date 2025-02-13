@@ -38,7 +38,8 @@ namespace MortarCore {
 		RenderAPI::SetAPI(renderAPI);
 
 		//initialze static renderAPI
-		MRT_CORE_ASSERT(RenderCommands::InitializeAPI());
+		int renderContext = RenderCommands::InitializeAPI();
+		MRT_CORE_ASSERT(renderContext);
 
 		RenderCommands::SetClearColor(glm::vec4(0.5f, 0.8f, 0.9f, 1.0f));
 		

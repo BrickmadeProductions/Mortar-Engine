@@ -9,7 +9,7 @@ namespace MortarCore {
 
 	void Camera::Awake()
 	{
-		speed = 0.25f;
+		speed = 0.2f;
 		defaultSpeed = speed;
 		sensitivity = 50.0f;
 		moveDirection = glm::vec3(0);
@@ -83,7 +83,7 @@ namespace MortarCore {
 
 		}
 
-		moveDirection = (getForward(Transform) * curSpeedX) + (getLeft(Transform) * curSpeedY);
+		moveDirection = (MRTMath::getForward(Transform) * curSpeedX) + (MRTMath::getLeft(Transform) * curSpeedY);
 
 		moveDirection = moveDirection + (glm::vec3(0, 1, 0) * curSpeedZ);
 
@@ -143,16 +143,10 @@ namespace MortarCore {
 		UpdateProjections(60, 0.1f, 10000.0f);
 	}
 
-	void Camera::PostDraw()
-    {
-    
-	}
-
-
     void Camera::UpdateProjections(uint32_t fov, float near, float far)
     {
 		m_ProjectionMatrix = glm::perspectiveFov(glm::radians((float)fov), (float)window->GetWidth(), (float)window->GetHeight(), near, far);
-		m_ViewMatrix = getViewMatrix(Transform);
+		m_ViewMatrix = MRTMath::getViewMatrix(Transform);
 	}
 
 

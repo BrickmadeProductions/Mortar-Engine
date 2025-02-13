@@ -35,7 +35,7 @@ namespace MortarCore
 		{
 			MRT_STARTUP();
 
-			m_ThreadPool = CreateScope<ThreadPool>(32);
+			m_ThreadPool = CreateScope<ThreadPool>(4);
  			m_Window = CreateScope<Window>(spec.Title, spec.RenderAPI, spec.WinWidth, spec.WinHeight);
 			m_Scene = CreateScope<Scene>();
 			s_Instance = this;

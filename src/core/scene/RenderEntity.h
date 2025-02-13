@@ -1,33 +1,34 @@
 #pragma once
 
 #include "core/math/Math.h"
+#include "core/renderer/Renderer.h"
+#include "core/resource/Mesh.h"
+#include "core/resource/Material.h"
 #include "Entity3D.h"
 
 
-namespace MortarCore {
 
-	class RenderEntity : public Entity3D
+namespace MortarCore {
+	
+    class RenderEntity3D : public Entity3D
 	{
 	public:
 
-		RenderEntity() : Entity3D("RenderEntity"), m_Model(){}
-		RenderEntity(std::string Name) : Entity3D(Name), m_Model() {}
-		RenderEntity(std::string Name, Ref<Model>& model) : Entity3D(Name), m_Model(model) {}
-		RenderEntity(Ref<Model>& model) : Entity3D(), m_Model(model) {}
-		virtual ~RenderEntity() {}
+		RenderEntity3D() : Entity3D("RenderEntity3D") { }
+		RenderEntity3D(std::string Name) : Entity3D(Name) { }
+		virtual ~RenderEntity3D() {}
+        
+        virtual void BuildRenderData() {}
 
-        Ref<Model>& GetModel() { return m_Model; }
-		void SetModel(Ref<Model>& m) { m_Model = m; }
+	protected:
+        //VertexArray used for storing any data needed about this objects rendering instructions
+        Ref<VertexArray> m_VertexArray;
 
-		virtual void Update (double delta) override
-		{
-			Transform.rotation.x += (float)delta * 2.0f;
-			Transform.rotation.y += (float)delta * 2.0f;
-			Transform.rotation.z += (float)delta * 2.0f;
-		}
-
-	private:
-
-        Ref<Model> m_Model;
+    private:
 	};
+
+	
+
+
+	
 }

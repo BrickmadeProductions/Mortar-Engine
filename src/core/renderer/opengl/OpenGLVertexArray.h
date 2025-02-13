@@ -10,11 +10,14 @@ namespace MortarCore {
 
 	public:
 
-		OpenGLVertexArray(uint32_t drawInstances);
+		OpenGLVertexArray();
 		virtual ~OpenGLVertexArray();
 
-		virtual void PushVertexBuffer(const Ref<VertexBuffer>& vertBuffer, uint32_t divisor);
-		virtual void SetIndexBuffer( const Ref<IndexBuffer>& indexBuffer);
+		virtual void PushVertexBuffer(const Ref<VertexBuffer>& vertBuffer, uint32_t divisor) override;
+		virtual void SetIndexBuffer( const Ref<IndexBuffer>& indexBuffer) override;
+
+		virtual void SetShaderStorageBuffer(const Ref<ShaderStorageBuffer>& shaderStorageBufer) override;
+
 		virtual void Bind() override;
 		virtual void Unbind() const override;
 	};

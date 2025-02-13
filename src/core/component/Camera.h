@@ -18,16 +18,15 @@ namespace MortarCore {
 		glm::mat4 GetViewMatrix() { return m_ViewMatrix; }
 		glm::mat4 GetProjectionMatrix() { return m_ProjectionMatrix; }
 
-		bool CanSee(Ref<RenderEntity>& renderEntity)
-		{
+		// bool CanSee(Ref<Entity>& Entity)
+		// {
 			
-		}
+		// }
 
 
 		virtual void Awake() override;
 		virtual void Tick() override;
 		virtual void Update(double delta) override;
-		virtual void PostDraw() override;
 
 
 	private:

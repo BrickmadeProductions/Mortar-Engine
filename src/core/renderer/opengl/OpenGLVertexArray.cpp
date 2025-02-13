@@ -21,10 +21,11 @@ namespace MortarCore
 		return 0;
 	}
 
-	OpenGLVertexArray::OpenGLVertexArray(uint32_t drawInstances)
+	OpenGLVertexArray::OpenGLVertexArray()
 	{
-		m_VertexBufferIndex = 0;
-		m_DrawInstances = drawInstances;
+
+		m_VertexAttribIndexIndex = 0;
+
 		glGenVertexArrays(1, &m_BufferID);
 		MRT_CORE_ASSERT(!glGetError());
 	}
@@ -47,10 +48,10 @@ namespace MortarCore
 
 		for (auto& element : layout.GetElements())
 		{
-			MRT_PRINT("Vertex Attrib Index: " + std::to_string(m_VertexBufferIndex) + " Element Count: " + std::to_string(element.GetComponents()) + " Stride: " + std::to_string(layout.Stride));
+			//MRT_PRINT("Vertex Attrib Index: " + std::to_string(m_VertexAttribIndexIndex) + " Element Count: " + std::to_string(element.GetComponents()) + " Stride: " + std::to_string(layout.Stride));
 			//default layout (abstract later)
 			//(vertexPos, normalDir, texCoord)
-			glVertexAttribPointer(m_VertexBufferIndex,
+			glVertexAttribPointer(m_VertexAttribIndexIndex,
 				element.GetComponents(),
 				ShaderDataTypeToOpenGLBaseType(element.Type),
 				GL_FALSE,
@@ -58,13 +59,13 @@ namespace MortarCore
 				(GLvoid*)(element.Offset));
 			MRT_CORE_ASSERT(!glGetError());
 	
-			glEnableVertexAttribArray(m_VertexBufferIndex);
+			glEnableVertexAttribArray(m_VertexAttribIndexIndex);
 			MRT_CORE_ASSERT(!glGetError());
 
-			glVertexAttribDivisor(m_VertexBufferIndex, divisor); // divisor = 1 each instance gets a unique value for this attribute
+			glVertexAttribDivisor(m_VertexAttribIndexIndex, divisor); // divisor = 1 each instance gets a unique value for this attribute
 			MRT_CORE_ASSERT(!glGetError());
 	
-			m_VertexBufferIndex++;			
+			m_VertexAttribIndexIndex++;			
 		
 
 		}
@@ -85,11 +86,15 @@ namespace MortarCore
 
 		m_IndexBuffer = IndexBuffer;
 	}
+	
+	void OpenGLVertexArray::SetShaderStorageBuffer(const Ref<ShaderStorageBuffer>& shaderStorageBufer) 
+	{
+		m_ShaderStorageBuffer = shaderStorageBufer;
+	}
 
 	void OpenGLVertexArray::Bind()
 	{
 
-		
 		glBindVertexArray(m_BufferID);
 		MRT_CORE_ASSERT(!glGetError());
 		

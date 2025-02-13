@@ -12,6 +12,7 @@ namespace MortarCore {
 	{
 	public:
 
+
 		Window(const char* title, RenderAPI::API renderAPI, const uint32_t width, const uint32_t height);
 		~Window() = default;
 
