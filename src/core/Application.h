@@ -42,10 +42,13 @@ namespace MortarCore
 			s_Instance = this;
 		
 			//initialze static renderAPI
-			MRT_CORE_ASSERT(RenderCommands::InitializeAPI());
+			RenderCommands::InitializeAPI();
 			RenderCommands::SetClearColor(glm::vec4(0.5f, 0.8f, 0.9f, 1.0f));
+			MRT_PRINT("SCENE LOADED");
 
 			m_Scene = CreateScope<Scene>();
+			MRT_PRINT("SCENE LOADED");
+			
 			m_Window->UpdateTitle();
 		}
 

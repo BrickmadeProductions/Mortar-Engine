@@ -25,7 +25,6 @@ namespace MortarCore {
 		void Push();
 		void UpdateTitle();
 		void Shutdown();
-
 	private:
 
 		char title;
