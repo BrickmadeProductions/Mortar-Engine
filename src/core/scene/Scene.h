@@ -18,42 +18,46 @@ namespace MortarCore {
 		~Scene() = default;
 
 		static Camera* GetCameraCurrent();
+		static std::unordered_map<std::string, Ref<Entity>>& GetSceneEntities();
 
-		//Instantiates a blank entity of type T
+		// Instantiates a blank entity of type T
 		template <class T>
-		Ref<T> Instantiate(std::string name) 
+		Ref<T> Instantiate(std::string name)
 		{
-			if (m_EntitiesByName.contains(name)) 
+			if (m_SceneEntities.contains(name)) 
 			{
 				MRT_PRINT_ERR("ENTITY WITH THIS NAME ALREADY EXISTS")
 				return nullptr;
 			}
 			
-			m_InstanceNonce++;
-			
-			Ref<T> entity = CreateRef<T>(name);
+			Ref<T> entity = MortarObject::Create<T>(name);
 
-			//add to EntitiesList
-			m_Entities.emplace(m_InstanceNonce, entity);
-			m_EntitiesByName.emplace(entity->Name, entity);
-			
-			//Call the awake function
-			entity->Awake();
+			m_SceneEntities.emplace(entity->Name, entity); // Add to local scene entities list
+	
+			entity->Awake(); //Call the awake function
 			
 			return entity;
 		}
-
+		
+		// Destroys and frees the entity from memory
+		void Destroy(uint64_t entityID)
+		{
+			m_SceneEntities.erase(Reflection::GetMortarObject<Entity>(entityID)->Name);
+			
+			Reflection::GetMortarObject<Entity>(entityID)->Destroy(); // Run destroy callback
+        	Reflection::FreeMortarObject(entityID);
+		}
 
 		template <typename T>
-		Ref<T> GetEntity(uint32_t objectID) { return m_Entities[objectID]; }
+		Ref<T> GetEntity(uint32_t objectID) { return Reflection::m_Entities[objectID]; }
 		
 		template <typename T>
-		Ref<T> GetEntity(std::string name) { return m_EntitiesByName[name]; }
+		Ref<T> GetEntity(std::string name) { return m_SceneEntities[name]; }
 		
 		template <typename T>
 		Ref<T> GetEntity() 
 		{ 
-			for (const auto& entityPair : m_Entities) 
+			for (const auto& entityPair : m_SceneEntities) 
 			{
 				auto& entity = entityPair.second;
 
@@ -69,7 +73,7 @@ namespace MortarCore {
 		template <typename T>
 		Ref<T> GetEntity(const std::function<bool(const Ref<Entity>)>& testCondition) 
 		{ 
-			for (const auto& entityPair : m_Entities) 
+			for (const auto& entityPair : m_SceneEntities) 
 			{
 				auto& entity = entityPair.second;
 
@@ -87,18 +91,18 @@ namespace MortarCore {
 		{ 
 			MRT_PROF();
 			
-			for (const auto& e : m_Entities) 
+			for (const auto& e : m_SceneEntities) 
 			{
 				//get current camera by last active
 				if (e.second->IsType<Camera>() && e.second->IsActive) m_MainCamera = e.second->Get<Camera>();
-				if (e.second->IsType<RenderEntity3D>()) e.second->Get<RenderEntity3D>()->BuildRenderData();
+				if (e.second->IsType<RenderEntity3D>()) e.second->Get<RenderEntity3D>()->Build();
 			}
 		}
 		//Called every frame
 		void Update(double delta) 
 		{ 
 			MRT_PROF();
-			for (const auto& e : m_Entities) 
+			for (const auto& e : m_SceneEntities) 
 			{
 				if (!e.second->IsActive) continue;
 				e.second->Update(delta); 
@@ -110,7 +114,7 @@ namespace MortarCore {
 		{ 
 			
 			MRT_PROF();
-			for (const auto& e : m_Entities) 
+			for (const auto& e : m_SceneEntities) 
 			{ 
 				if (!e.second->IsActive) continue; 
 				e.second->Tick(); 
@@ -125,7 +129,7 @@ namespace MortarCore {
 			RenderCommands::Clear();
 
 			//submit batches to renderer
-			for (const auto& e : m_Entities) 
+			for (const auto& e : m_SceneEntities) 
 			{
 				if (!e.second->IsActive) continue;
 				//call its draw function
@@ -137,10 +141,8 @@ namespace MortarCore {
 
 		Camera* m_MainCamera;
 
-		std::unordered_map<uint32_t, Ref<Entity>> m_Entities;
-		std::unordered_map<std::string, Ref<Entity>> m_EntitiesByName;
+		std::unordered_map<std::string, Ref<Entity>> m_SceneEntities;
 
-		uint32_t m_InstanceNonce = 0;
 	};
 
 }

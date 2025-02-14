@@ -23,6 +23,14 @@ namespace MortarCore {
 				return static_cast<float>(next()) / static_cast<float>(UINT64_MAX);
 			}
 
+			uint32_t nextInt() {
+				return static_cast<uint32_t>(next());
+			}
+
+			uint64_t nextInt64() {
+				return static_cast<uint64_t>(next());
+			}
+
 		private:
 		uint64_t state;
 	};
@@ -38,8 +46,12 @@ namespace MortarCore {
 		}
 		
 		static int RInt(int min, int max) {
-			return uint32_t(RFloat(float(min), float(max)));
+			return rng.nextInt() * (max - min);
 		}
+		static uint64_t R64Int(uint64_t min, uint64_t max) {
+			return rng.nextInt64() * (max - min);
+		}
+
 
 		static const float clampF(const float val, const float min, const float max) {
 

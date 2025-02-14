@@ -19,6 +19,8 @@ int main(int argc, char** argv)
 	Ref<Texture> WoodTexture = Loader::LoadResource<Texture>("resource/WoodTexture.mres");
 	Ref<Texture> FireParticleTexture = Loader::LoadResource<Texture>("resource/FireTexture.mres");
 
+	Ref<Texture> CampfireWoodTexture = Loader::LoadResource<Texture>("resource/CampfireWoodTexture.mres");
+
 	//load shader
 	Ref<Shader> DefaultSpatialShader = Loader::LoadResource<Shader>("resource/DefaultSpatial_Shader.mres");
 	Ref<Shader> GPUParticleShader = Loader::LoadResource<Shader>("resource/DefaultGPUParticle3D_Shader.mres");
@@ -27,6 +29,12 @@ int main(int argc, char** argv)
 	Ref<Model> DirtModel = Loader::LoadResource<Model>("resource/Cube.mres");
 	Ref<Model> Plane = Loader::LoadResource<Model>("resource/Plane.mres");
 	Ref<Model> WoodModel = DirtModel->MakeCopy<Model>();
+
+	Ref<Model> CampfireModel = Loader::LoadResource<Model>("resource/CampfireModel.mres");
+
+	//campfire
+	CampfireModel->GetMesh(0)->m_Material = CreateRef<Material>(DefaultSpatialShader);
+	CampfireModel->GetMesh(0)->m_Material->m_MainTex = CampfireWoodTexture;
 
 	//wood
 	WoodModel->GetMesh(0)->m_Material = CreateRef<Material>(DefaultSpatialShader);
@@ -48,37 +56,24 @@ int main(int argc, char** argv)
 	//instantiate player
 	Ref<Camera> player = app->GetScene().Instantiate<Camera>("Player");
 
+	//instantiate campfire
+	Ref<MeshEntity3D> Campfire = app->GetScene().Instantiate<MeshEntity3D>("Campfire");
+	Campfire->SetModel(CampfireModel);
+	Campfire->Transform.scale = glm::vec3(7.0, 7.0, 7.0);
+
 	for (int i = 0; i < 1; i++)
 	{
 		Ref<ParticleProcessData> ParticleData = CreateRef<ParticleProcessData>(ParticleMesh);
 		Ref<GPUParticles3D> Particles = app->GetScene().Instantiate<GPUParticles3D>("Particles " + std::to_string(i));
 		Particles->Transform.position = glm::vec3(0.0, 0.0, 0.0);
-		Particles->LifeTime = 4;
-		Particles->Randomess = 2;
-		Particles->StartVelocity = glm::vec3(0.0, 0.75, 0.0);
-		Particles->SpawnOffset = 0.005f;
+		Particles->LifeTime = 5;
+		Particles->Randomess = 10.0f;
+		Particles->StartVelocity = glm::vec3(0.0, 25.0f, 0.0);
+		Particles->GravityMultiplier = -0.001f;
+		Particles->SpawnOffset = 0.025f;
 		Particles->BillboardEnabled = true;
-		Particles->SetParticleData(ParticleData, 1000);
-
-		//Particles->Transform.position = glm::vec3(MRTMath::RFloat(-100.0f, 100.0f), MRTMath::RFloat(-100.0f, 100.0f), MRTMath::RFloat(-100.0f, 100.0f));
+		Particles->SetParticleData(ParticleData, 100000);
 	}
-
-	for (int i = 0; i < 0; i++)
-	{
-		Ref<MeshEntity3D> Dirt = app->GetScene().Instantiate<MeshEntity3D>("Dirt " + std::to_string(i));
-		Dirt->SetModel(DirtModel);
-		Ref<MeshEntity3D> Wood = app->GetScene().Instantiate<MeshEntity3D>("Wood " + std::to_string(i));
-		Wood->SetModel(WoodModel);
-	
-		Dirt->Transform.position = glm::vec3(MRTMath::RFloat(-100.0f, 100.0f), MRTMath::RFloat(-100.0f, 100.0f), MRTMath::RFloat(-100.0f, 100.0f));
-		Dirt->Transform.rotation = glm::vec3(MRTMath::RFloat(-360.0f, 360.0f), MRTMath::RFloat(-360.0f, 360.0f), MRTMath::RFloat(-360.0f, 360.0f));
-		Dirt->Transform.scale = glm::vec3(MRTMath::RFloat(0.5f, 5.0f));
-	
-		Wood->Transform.position = glm::vec3(MRTMath::RFloat(-100.0f, 10.0f), MRTMath::RFloat(-100.0f, 10.0f), MRTMath::RFloat(-100.0f, 100.0f));
-		Wood->Transform.rotation = glm::vec3(MRTMath::RFloat(-360.0f, 360.0f), MRTMath::RFloat(-360.0f, 360.0f), MRTMath::RFloat(-360.0f, 360.0f));
-		Wood->Transform.scale = glm::vec3(MRTMath::RFloat(0.5f, 5.0f));
-	}
-
 	
 
 	//app loop

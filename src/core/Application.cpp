@@ -2,9 +2,6 @@
 
 namespace MortarCore
 {
-	//target fps
-	const double frameDuration = 1.0 / 280.0;
-
 	Application* Application::s_Instance = nullptr;
 
 	Application::~Application() {}
@@ -15,7 +12,7 @@ namespace MortarCore
 		MRT_PROF();
 		auto frameStart = std::chrono::steady_clock::now();
 
-		RenderCommands::GetRenderAPI()->PreFrame();
+		m_ImGUILayer->PreFrame();
 
 		//tick the world if we are at 60 ticks elapsed
 		if (m_TimeSinceLastTick >= 1.0f / 60.0f) 
@@ -30,24 +27,13 @@ namespace MortarCore
 			
 		}
 
-		//update the frame by frame method that has the last frame time as a param
-		m_Scene->Update(m_LastFrameTime);
-
-		//render the scene and push to the windows frame buffer
+		m_Scene->Update(m_LastFrameTime); // Render the scene and push to the windows frame buffer
 		m_Scene->Draw();
 
-		ImGui::Begin("Debug Info");
-		ImGui::Text((std::to_string(GetFPS()) + " FPS ").data());
-		ImGui::Text((std::to_string(GetFrameTime()) + " ms ").data());
+		m_ImGUILayer->Draw(); // Draw ImGUI Elements
+		m_ImGUILayer->PostFrame();
 
-		Transform& CameraTransform = Scene::GetCameraCurrent()->Transform;
-		ImGui::Text(("Camera Location: " + std::to_string(CameraTransform.position.x) + ", " + std::to_string(CameraTransform.position.y) + ", " + std::to_string(CameraTransform.position.z)).data());
-		ImGui::Text(("Camera Rotation: " + std::to_string(CameraTransform.rotation.x) + ", " + std::to_string(CameraTransform.rotation.y) + ", " + std::to_string(CameraTransform.rotation.z)).data());
-		ImGui::End();
-
-		RenderCommands::GetRenderAPI()->PostFrame();
-
-		m_Window->Push();
+		m_Window->Push(); // Push all data to the window
 
 		//game loop ends here, everything after makes the thread sleep or does frame time calculations (abstract later)
 		auto frameEnd = std::chrono::steady_clock::now();

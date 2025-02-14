@@ -25,9 +25,6 @@ namespace MortarCore
 		virtual void SetClearColor(const glm::vec4& color) = 0;
         virtual void Clear() = 0;
 
-        virtual void PreFrame() = 0;
-        virtual void PostFrame() = 0;
-
         virtual void DrawInstanced(const Ref<VertexArray>& VertexArray, uint32_t vertCount, uint32_t instanceCount) = 0;
 
         virtual void LoadTexture(Ref<Texture>& texture) = 0;
@@ -40,6 +37,7 @@ namespace MortarCore
     protected:
     
         static uint32_t s_CurrentTextureUnit;
+        static glm::vec3 s_CurrentClearColor;
         static API s_API;
 
     };

@@ -5,9 +5,14 @@
 #include "core/Window.h"
 #include "core/scene/Scene.h"
 #include "core/ThreadPool.h"
+#include "core/vendor/imgui/ImGui.h"
 
 namespace MortarCore
 {
+	//target fps
+	const double frameDuration = 1.0 / 280.0;
+
+
 	struct ApplicationCommandLineArgs
 	{
 		int Count = 0;
@@ -35,40 +40,36 @@ namespace MortarCore
 		{
 			MRT_STARTUP();
 
-			m_ThreadPool = CreateScope<ThreadPool>(4);
+			m_ThreadPool = CreateScope<ThreadPool>(8);
  			m_Window = CreateScope<Window>(spec.Title, spec.RenderAPI, spec.WinWidth, spec.WinHeight);
-			m_LastFrameTime = 1.0;
-
+			m_LastFrameTime = frameDuration;
 			s_Instance = this;
-		
-			//initialze static renderAPI
+
 			RenderCommands::InitializeAPI();
-			RenderCommands::SetClearColor(glm::vec4(0.5f, 0.8f, 0.9f, 1.0f));
-			MRT_PRINT("SCENE LOADED");
 
 			m_Scene = CreateScope<Scene>();
-			MRT_PRINT("SCENE LOADED");
 			
 			m_Window->UpdateTitle();
 		}
 
 		virtual ~Application();
 
-		ApplicationSpecification GetAppSpec() { return m_Spec; }
+		inline static ApplicationSpecification& GetAppSpec() { return s_Instance->m_Spec; }
 
-		inline double GetFrameTime()
-		{ 
-			return m_LastFrameTime;
-		}
-		inline double GetFPS() { return 1.0 / m_LastFrameTime; }
-		
-		inline static Application& Get() { return *s_Instance; }
+		inline static double GetFrameTime() { return s_Instance->m_LastFrameTime; }
+		inline static double GetFPS() { return 1.0 / (s_Instance->m_LastFrameTime); }
 
+		inline static ImGUILayer& GetImGUI() { return *s_Instance->m_ImGUILayer; }
 		inline static Window& GetWindow() { return *s_Instance->m_Window; }
 		inline static Scene& GetScene() { return *s_Instance->m_Scene; }
 		inline static ThreadPool& GetThreadPool() { return *s_Instance->m_ThreadPool; }
 
-		void Initialize() { m_Scene->Awake(); }
+		void Initialize() 
+		{ 
+			m_ImGUILayer = ImGUILayer::Initialize();
+			m_Scene->Awake(); 
+		}
+
 		void Run();
 		bool ShouldRun() { return !glfwWindowShouldClose(m_Window->GetNativeWindow()); }
 		int Close();
@@ -78,6 +79,8 @@ namespace MortarCore
 		Scope<Window> m_Window;
 		Scope<Scene> m_Scene;
 		Scope<ThreadPool> m_ThreadPool;
+
+		Scope<ImGUILayer> m_ImGUILayer;
 
 		bool m_Running = true;
 		bool m_Minimized = false;

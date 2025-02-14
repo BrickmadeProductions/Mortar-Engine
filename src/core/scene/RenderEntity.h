@@ -18,8 +18,8 @@ namespace MortarCore {
 		RenderEntity3D(std::string Name) : Entity3D(Name) { }
 		virtual ~RenderEntity3D() {}
         
-        virtual void BuildRenderData() {}
-
+        virtual void Build() {}
+		
 	protected:
         //VertexArray used for storing any data needed about this objects rendering instructions
         Ref<VertexArray> m_VertexArray;

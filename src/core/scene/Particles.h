@@ -81,7 +81,8 @@ namespace MortarCore {
 				for (uint32_t i = 0; i < change; i++) 
 				{
 					//generate some random starting velocites based on the original
-					Particle part(glm::vec3(0), glm::vec3(1.0), StartVelocity, 1.0f);
+					glm::vec3 startVelocity = glm::vec3(StartVelocity.x + MRTMath::RFloat(-Randomess, Randomess), StartVelocity.y + MRTMath::RFloat(-Randomess, Randomess), StartVelocity.z + MRTMath::RFloat(-Randomess, Randomess));
+					Particle part(glm::vec3(0), glm::vec3(1.0), startVelocity, 1.0f);
 					m_ParticleProcessData->GetParticles().push_back(part);
 				}
 			}
@@ -89,10 +90,16 @@ namespace MortarCore {
 			//this should destroy any particles that
 			m_ParticleProcessData->GetParticles().resize(particleAmount);
 
+			// //rebuild
+			// if (m_VertexArray->GetShaderStorageBuffer())
+			// {
+			// 	std::vector<char> flatBuffer = Buffer::Flatten<Particle>(m_ParticleProcessData->GetParticles());
+			// }
+
 		}
 
 		//ABSTRACT LATER
-		virtual void BuildRenderData() override
+		virtual void Build() override
 		{
 
 			m_VertexArray = VertexArray::Create();
@@ -105,7 +112,6 @@ namespace MortarCore {
 
 			std::vector<char> flatBuffer = Buffer::Flatten<Particle>(m_ParticleProcessData->GetParticles());
 			Ref<ShaderStorageBuffer> shaderStorageBuffer = ShaderStorageBuffer::CreateBuffer(flatBuffer.data(), uint32_t(flatBuffer.size()));
-			std::vector<Particle> deFlattend = Buffer::Deflatten<Particle>(flatBuffer);
 
 			// PARTICLE VERTEX ATTRIBUTES \\
 
@@ -127,11 +133,12 @@ namespace MortarCore {
 
 			m_ParticleProcessData->GetComputeShader()->Activate(); //set compute shader uniforms
 			m_VertexArray->GetShaderStorageBuffer()->Bind();
-			m_ParticleProcessData->GetComputeShader()->SetFloat(float(Application::Get().GetFrameTime()), "m_DeltaTime");
+			m_ParticleProcessData->GetComputeShader()->SetFloat(float(Application::GetFrameTime()), "m_DeltaTime");
 			m_ParticleProcessData->GetComputeShader()->SetFloat(Randomess, "m_Randomness");
 			m_ParticleProcessData->GetComputeShader()->SetFloat(LifeTime, "m_TotalLifeTime");
 			m_ParticleProcessData->GetComputeShader()->SetFloat(SpawnOffset, "m_SpawnOffset");
 			m_ParticleProcessData->GetComputeShader()->SetVec3(StartVelocity, "m_StartVelocity");
+			m_ParticleProcessData->GetComputeShader()->SetFloat(GravityMultiplier, "m_GravityMultiplier");
 
 			GLuint workgroupSize = 256; // Your workgroup size
 			GLuint numGroups = (m_ParticleAmount + workgroupSize - 1) / workgroupSize;  // Round up
@@ -146,7 +153,26 @@ namespace MortarCore {
 			Renderer::Submit(m_VertexArray, m_ParticleProcessData->GetBatchShader(), m_ParticleAmount);
 		}
 
+		void RegisterProperties() override
+		{
+			Reflection::RegisterProperty(m_ID, "Transform", VariantType::OBJECT, &Transform);
+			Reflection::RegisterProperty(m_ID, "StartVelocity", VariantType::VEC3, &StartVelocity);
+			
+			Reflection::RegisterProperty(m_ID, "Emitting", VariantType::BOOL, &Emitting);
+			Reflection::RegisterProperty(m_ID, "BillboardEnabled", VariantType::BOOL, &BillboardEnabled);
+
+			Reflection::RegisterProperty(m_ID, "ParticleAmount", VariantType::INT, &m_ParticleAmount);
+
+			Reflection::RegisterProperty(m_ID, "GravityMultiplier", VariantType::FLOAT, &GravityMultiplier);
+			Reflection::RegisterProperty(m_ID, "Randomess", VariantType::FLOAT, &Randomess);
+			Reflection::RegisterProperty(m_ID, "LifeTime", VariantType::FLOAT, &LifeTime);
+			Reflection::RegisterProperty(m_ID, "SpawnOffset", VariantType::FLOAT, &SpawnOffset);
+
+
+		}
+
 		glm::vec3 StartVelocity;
+		float GravityMultiplier;
 		bool Emitting;
 		float Randomess;
 		float LifeTime;

@@ -16,6 +16,11 @@ namespace MortarCore
             Entity3D(std::string Name, Transform& transform) : Entity(Name), Transform(transform) {}
             virtual ~Entity3D() = default;
 
+            void RegisterProperties() override
+            {
+                Reflection::RegisterProperty(m_ID, "Transform", VariantType::OBJECT, &Transform);
+            }
+
         public:
 
             Transform Transform;            

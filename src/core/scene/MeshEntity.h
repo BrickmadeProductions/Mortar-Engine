@@ -18,14 +18,8 @@ namespace MortarCore {
         Ref<Model>& GetModel() { return m_Model; }
 		void SetModel(Ref<Model>& m) { m_Model = m; }
 
-		virtual void Update (double delta) override
-		{
-			Transform.rotation.x += (float)delta * 2.0f;
-			Transform.rotation.y += (float)delta * 2.0f;
-			Transform.rotation.z += (float)delta * 2.0f;
-		}
-
-		virtual void Draw() override
+		void Update (double delta) override {}
+		void Draw() override
 		{
 			for (auto& mesh : m_Model->GetMeshArray()) 
 			{
@@ -40,9 +34,8 @@ namespace MortarCore {
 			}
 
 		}
-
 		//ABSTRACT LATER
-		virtual void BuildRenderData() override
+		void Build() override
 		{
 			//Create the vertex array for this object
 		 	m_VertexArray = VertexArray::Create();
@@ -65,7 +58,7 @@ namespace MortarCore {
 			m_VertexArray->Unbind();
 			
 		}
-
+;
 	private:
 
         Ref<Model> m_Model;

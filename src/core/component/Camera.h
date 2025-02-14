@@ -10,7 +10,8 @@ namespace MortarCore {
 	{
 	public:
 		
-		using Entity3D::Entity3D;
+		Camera() : Entity3D("Camera") {}
+		Camera(std::string Name) : Entity3D(Name) {}
 		virtual ~Camera();
 
 		//retreives the perspective projection based on the params
@@ -23,11 +24,18 @@ namespace MortarCore {
 			
 		// }
 
-
 		virtual void Awake() override;
 		virtual void Tick() override;
 		virtual void Update(double delta) override;
 
+		void SetClearColor(float r, float g, float b);
+
+		void RegisterProperties() override
+		{
+			Reflection::RegisterProperty(m_ID, "Speed", VariantType::FLOAT, &Speed);
+		}
+
+		float Speed;
 
 	private:
 
@@ -35,11 +43,10 @@ namespace MortarCore {
 		Window* window;
 
 		//MOVE TO SEPERATE CLASS LATER
-		float speed;
-		float defaultSpeed;
-		float sensitivity;
-		bool firstClick = false;
-		glm::vec3 moveDirection;
+		float m_DefaultSpeed;
+		float m_Sensitivity;
+		bool m_FirstClick = false;
+		glm::vec3 m_MoveDirection;
 		//MOVE TO SEPERATE CLASS LATER
 
 		glm::mat4 m_ViewMatrix;

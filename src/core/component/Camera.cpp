@@ -7,16 +7,18 @@ namespace MortarCore {
     {
     }
 
+
 	void Camera::Awake()
 	{
-		speed = 0.2f;
-		defaultSpeed = speed;
-		sensitivity = 50.0f;
-		moveDirection = glm::vec3(0);
-
+		Speed = 0.2f;
+		m_DefaultSpeed = Speed;
+		m_Sensitivity = 50.0f;
+		m_MoveDirection = glm::vec3(0);
+		SetClearColor(0.5f, 0.8f, 0.9f);
 		window = &Application::GetWindow();
 	}
 
+	
     void Camera::Tick()
     {
     
@@ -38,60 +40,60 @@ namespace MortarCore {
 		// Handles key inputs
 		if (glfwGetKey(window->GetNativeWindow(), GLFW_KEY_W)) {
 
-			curSpeedX = speed;
+			curSpeedX = Speed;
 
 		}
 
 		if (glfwGetKey(window->GetNativeWindow(), GLFW_KEY_A)) {
 
-			curSpeedY = speed;
+			curSpeedY = Speed;
 		}
 
 		if (glfwGetKey(window->GetNativeWindow(), GLFW_KEY_S)) {
 
-			curSpeedX = -speed;
+			curSpeedX = -Speed;
 		}
 
 		if (glfwGetKey(window->GetNativeWindow(), GLFW_KEY_D)) {
 
 
-			curSpeedY = -speed;
+			curSpeedY = -Speed;
 		}
 
 		if (glfwGetKey(window->GetNativeWindow(), GLFW_KEY_LEFT_CONTROL)) {
 
-			curSpeedZ = -speed;
+			curSpeedZ = -Speed;
 
 		}
 
 		if (glfwGetKey(window->GetNativeWindow(), GLFW_KEY_SPACE)) {
 
-			curSpeedZ = speed;
+			curSpeedZ = Speed;
 		}
 
 		if (glfwGetKey(window->GetNativeWindow(), GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
 		{
-			speed = defaultSpeed * 5.0f;
+			Speed = m_DefaultSpeed * 5.0f;
 		}
 		if (glfwGetKey(window->GetNativeWindow(), GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE)
 		{
-			speed = defaultSpeed;
+			Speed = m_DefaultSpeed;
 		}
 		else {
 
-			moveDirection = glm::vec3(0);
+			m_MoveDirection = glm::vec3(0);
 
 		}
 
-		moveDirection = (MRTMath::getForward(Transform) * curSpeedX) + (MRTMath::getLeft(Transform) * curSpeedY);
+		m_MoveDirection = (MRTMath::getForward(Transform) * curSpeedX) + (MRTMath::getLeft(Transform) * curSpeedY);
 
-		moveDirection = moveDirection + (glm::vec3(0, 1, 0) * curSpeedZ);
+		m_MoveDirection = m_MoveDirection + (glm::vec3(0, 1, 0) * curSpeedZ);
 
-		if (moveDirection != glm::vec3(0))
-			moveDirection = glm::normalize(moveDirection);
+		if (m_MoveDirection != glm::vec3(0))
+			m_MoveDirection = glm::normalize(m_MoveDirection);
 
 
-		Transform.position += (moveDirection * speed) * (float)delta * 100.0f;
+		Transform.position += (m_MoveDirection * Speed) * (float)delta * 100.0f;
 
 		// Handles mouse inputs
 		if (glfwGetMouseButton(window->GetNativeWindow(), GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
@@ -101,10 +103,10 @@ namespace MortarCore {
 			glfwSetInputMode(window->GetNativeWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
 			// Prevents camera from jumping on the first click
-			if (firstClick)
+			if (m_FirstClick)
 			{
 				glfwSetCursorPos(window->GetNativeWindow(), (window->GetWidth() / 2.0f), (window->GetHeight() / 2.0f));
-				firstClick = false;
+				m_FirstClick = false;
 			}
 
 			// Stores the coordinates of the cursor
@@ -115,8 +117,8 @@ namespace MortarCore {
 
 			// Normalizes and shifts the coordinates of the cursor such that they begin in the middle of the screen
 			// and then "Transforms" them into degrees 
-			float rotX = sensitivity * (float)(mouseY - (window->GetHeight() / 2.0f)) / window->GetHeight();
-			float rotY = sensitivity * (float)(mouseX - (window->GetWidth() / 2.0f)) / window->GetWidth();
+			float rotX = m_Sensitivity * (float)(mouseY - (window->GetHeight() / 2.0f)) / window->GetHeight();
+			float rotY = m_Sensitivity * (float)(mouseX - (window->GetWidth() / 2.0f)) / window->GetWidth();
 
 			// Calculates upcoming vertical change in the Orientation
 
@@ -137,7 +139,7 @@ namespace MortarCore {
 			// Unhides cursor since camera is not looking around anymore
 			glfwSetInputMode(window->GetNativeWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			// Makes sure the next time the camera looks around it doesn't jump
-			firstClick = true;
+			m_FirstClick = true;
 		}
 
 		UpdateProjections(60, 0.1f, 10000.0f);
@@ -149,7 +151,10 @@ namespace MortarCore {
 		m_ViewMatrix = MRTMath::getViewMatrix(Transform);
 	}
 
-
+	void Camera::SetClearColor(float r, float g, float b)
+	{
+		RenderCommands::SetClearColor(glm::vec4(r, g, b, 1.0f));
+	}
 
 }
 

@@ -56,7 +56,7 @@ namespace MortarCore {
 		Transform& CameraTransform = Scene::GetCameraCurrent()->Transform;
 
         //set window
-        std::string total(std::string("MortarEngine v0.01 " + std::string(Application::Get().GetAppSpec().Title)));
+        std::string total(std::string("MortarEngine v0.01 | " + std::string(Application::GetAppSpec().Title)));
 		glfwSetWindowTitle(Application::GetWindow().GetNativeWindow(), total.c_str());
 	}
 

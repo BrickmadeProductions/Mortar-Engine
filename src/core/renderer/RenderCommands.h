@@ -36,6 +36,7 @@ namespace MortarCore
                 s_RenderAPI->LoadTexture(tex);
             }
             static Scope<RenderAPI>& GetRenderAPI() {
+                
                 return s_RenderAPI;
             }
 
