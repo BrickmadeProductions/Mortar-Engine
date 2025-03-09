@@ -18,7 +18,10 @@ namespace MortarCore {
         Ref<Model>& GetModel() { return m_Model; }
 		void SetModel(Ref<Model>& m) { m_Model = m; }
 
-		void Update (double delta) override {}
+		void Update (double delta) override 
+		{
+			Transform.rotation += glm::vec3(delta, delta, delta);
+		}
 		void Draw() override
 		{
 			for (auto& mesh : m_Model->GetMeshArray()) 
@@ -58,7 +61,7 @@ namespace MortarCore {
 			m_VertexArray->Unbind();
 			
 		}
-;
+		
 	private:
 
         Ref<Model> m_Model;
